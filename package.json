@@ -1,0 +1,21 @@
+{
+  "name": "final_year_research_app",
+  "version": "1.0.0",
+  "description": "Final year research application",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared",
+    "lambda",
+    "sequelizer"
+  ],
+  "scripts": {
+    "dev": "echo 'Start development'",
+    "build": "echo 'Build all packages'",
+    "test": "echo 'Run tests'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db_medical_research
+    restart: always
+
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_USER: ${ROOT_USER}
+      POSTGRES_PASSWORD: ${ROOT_PASSWORD}
+      POSTGRES_DB: ${ROOT_DB}
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql   
+
+volumes:
+  pgdata:
+    name: pgdata_medical_research

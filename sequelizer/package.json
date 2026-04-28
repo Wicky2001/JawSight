@@ -1,0 +1,18 @@
+{
+  "name": "sequelizer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "This is used for migrations",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "sequelize db:migrate",
+    "migrate:undo": "sequelize db:migrate:undo",
+    "migrate:undo:all": "sequelize db:migrate:undo:all",
+    "seed": "sequelize db:seed:all"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sequelize-cli": "^6.6.5"
+  }
+}

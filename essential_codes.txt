@@ -1,0 +1,6 @@
+# Correct way to add a library to backend
+npm install express -w backend
+
+
+#docker commands
+docker compose up --build

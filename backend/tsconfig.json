@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                /* Modern JavaScript for 2026 */
+    "module": "NodeNext",              /* Best for modern Node.js */
+    "moduleResolution": "NodeNext",
+    "paths": {
+      "@shared/*": ["../shared/src/*"] /* The bridge to your shared research schemas */
+    },
+    "outDir": "./dist",                /* Where the compiled code goes */
+    "rootDir": "./src",
+    "strict": true,                    /* Critical for research accuracy */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "../shared/src/**/*"] /* Tell TS to look in both folders */
+}

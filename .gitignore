@@ -1,0 +1,99 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build and dist directories
+dist/
+build/
+*.tsbuildinfo
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+._.DS_Store
+*.lnk
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Testing
+.jest_cache/
+.mocha_cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Sequelize/Database
+sequelize-meta.json
+sequelize-data.json
+
+# Lambda builds
+lambda/dist/
+lambda/node_modules/
+
+# Local overrides
+.sequelizerc.local
+*.local.json
+
+# Frontend build artifacts
+frontend/dist/
+frontend/build/
+
+# Backend build artifacts
+backend/dist/
+backend/build/
+
+# AWS credentials (never commit)
+.aws/credentials
+.aws/config
+
+# Misc
+.cache/
+.turbo/
+dist-ssr/
+*.egg-info/
+__pycache__/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+crash.log
+crash.*.log
+.terraformrc
+terraform.rc
+.DS_Store.terraform
+*.tgz
