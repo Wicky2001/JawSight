@@ -4,3 +4,12 @@ npm install express -w backend
 
 #docker commands
 docker compose up --build
+
+
+git checkout -b feature/login
+git push -u origin new-branch-name
+git branch
+
+
+
+aws configure --profile dev

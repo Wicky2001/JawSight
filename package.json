@@ -11,7 +11,8 @@
     "sequelizer"
   ],
   "scripts": {
-    "dev": "echo 'Start development'",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
     "build": "echo 'Build all packages'",
     "test": "echo 'Run tests'"
   },

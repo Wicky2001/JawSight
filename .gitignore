@@ -73,6 +73,10 @@ backend/build/
 .aws/credentials
 .aws/config
 
+# Access keys and sensitive credentials
+*accessKeys.csv
+backend/JAW_SIGHT_DEV_accessKeys.csv
+
 # Misc
 .cache/
 .turbo/
