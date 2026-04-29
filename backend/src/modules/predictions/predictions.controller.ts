@@ -3,31 +3,48 @@ import httpStatus from "http-status";
 import { doctorSocketMap } from "../../helpers/socket.helper.js";
 import { pushToSqsQueue } from "./predictions.service.js";
 import ApiError from "../../helpers/classes/ApiError.js";
-import https from "https";
 
-export const handleRealSnsWebhook = (req: Request, res: Response) => {
+
+
+
+
+export const handleRealSnsWebhook = async (req: Request, res: Response) => {
   try {
-    // AWS SNS sometimes sends data as text/plain. Ensure your Express app 
-    // can parse it (e.g., app.use(express.json({type: ['application/json', 'text/plain']})))
     const snsMessageType = req.headers['x-amz-sns-message-type'];
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
     if (snsMessageType === 'SubscriptionConfirmation') {
-      // 1. AWS is checking if your server is alive. You must visit the SubscribeURL.
       console.log("Received SNS Subscription Confirmation!");
-      https.get(body.SubscribeURL, (awsRes:any) => {
-        console.log(`AWS Confirmation Status: ${awsRes.statusCode}`);
+
+      const subscribeUrl = body.SubscribeURL;
+      const topicArn = body.TopicArn;
+
+      if (!subscribeUrl) {
+        console.log("❌ No SubscribeURL found in confirmation message");
+        return res.status(400).json({ error: "no_subscribe_url" });
+      }
+
+      const response = await fetch(subscribeUrl);
+     
+        if (!response.ok) {
+            console.log("❌ Failed to confirm SNS subscription", await response.text());    
+            return res.status(500).json({ error: "subscription_confirmation_failed" });
+        }
+
+      return res.status(200).json({
+        status: "subscription_confirmed",
+        topic_arn: topicArn,
       });
-      return res.status(200).send("Confirmation accepted.");
     } 
     
     if (snsMessageType === 'Notification') {
-      // 2. This is the actual message from your Python Lambda!
       console.log("Received Real SNS Notification!");
       
       // The payload you sent from Lambda is stringified inside the 'Message' property
-      const predictionData = JSON.parse(body.Message); 
-      const { doctor_id, patient_id, imageUrl, iterationId } = predictionData;
+      const response = JSON.parse(body.Message); 
+      console.log("Parsed SNS Message:", response);
+      debugger;
+      const { doctor_id, patient_id, imageUrl, iterationId } = response.data;
 
       const io = req.app.get("socketio");
       const targetSocketId = doctorSocketMap.get(doctor_id);

@@ -3,6 +3,8 @@ import mainRouter from "./routes/index.js";
 import cors from "cors";
 
 const app = express();
+app.use(express.json())
+app.use(express.text()); 
 
 const whitelist = (process.env.CORS_ORIGINS || "http://localhost:3000")
   .split(",")
