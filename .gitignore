@@ -101,3 +101,8 @@ crash.*.log
 terraform.rc
 .DS_Store.terraform
 *.tgz
+
+.venv
+app_copy.py
+local_testing.py
+

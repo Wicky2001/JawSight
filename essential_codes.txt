@@ -13,3 +13,42 @@ git branch
 
 
 aws configure --profile dev
+
+
+
+Step 1 — Verify your AWS profile locally
+aws configure list --profile JAW_SIGHT_DEV
+
+Make sure it works:
+aws s3 ls --profile JAW_SIGHT_DEV
+
+
+Step 2 — Run your Docker container with mounted credentials
+
+docker run -it `
+  -p 9000:8080 `
+  -v $env:USERPROFILE\.aws:/root/.aws `
+  -e AWS_PROFILE=JAW_SIGHT_DEV `
+  -e AWS_REGION=us-east-1 `
+  -e BUCKET_NAME=result-images-915658834610-us-east-1-an `
+  -e SNS_TOPIC_ARN=arn:aws:sns:us-east-1:915658834610:model_process_status `
+  -e ENVIRONMENT=development `
+  jawsight/lambda-image-processing
+
+
+
+Step 3 — Invoke your Lambda
+
+curl http://localhost:9000/2015-03-31/functions/function/invocations `
+  -Method POST `
+  -InFile test_event.json `
+  -ContentType "application/json"
+
+
+
+---Lambda reports---
+
+END RequestId: e7916560-fecd-4dbd-be9d-fc1f263665c6
+REPORT RequestId: e7916560-fecd-4dbd-be9d-fc1f263665c6  Duration: 19714.18 ms   Billed Duration: 19715 ms    Memory Size: 3008 MB    Max Memory Used: 3008 MB
+
+REPORT RequestId: 0169d4d3-24d6-4d3c-9b7f-22ca0ca29708  Init Duration: 0.12 ms  Duration: 71309.07 ms        Billed Duration: 71310 ms       Memory Size: 3008 MB    Max Memory Used: 3008 MB

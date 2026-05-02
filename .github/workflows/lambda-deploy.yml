@@ -1,0 +1,54 @@
+name: Deploy to AWS Lambda (ECR)
+
+on:
+  push:
+    branches:
+      - main
+      # - feature/socket_and_sns
+    paths:
+      - lambda/**
+      - .github/workflows/lambda-deploy.yml
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  LAMBDA_FUNCTION_NAME: ${{ vars.LAMBDA_FUNCTION_NAME }} #jawsight-image-processing-lambda
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 3. Login to ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4. Build and push Docker image (correct path)
+      - name: Build and push image
+        id: build-image
+        run: |
+          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          docker build -t $IMAGE_URI ./lambda
+          docker push $IMAGE_URI
+          echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
+
+      # 5. Deploy to Lambda
+      - name: Deploy to AWS Lambda
+        uses: aws-actions/aws-lambda-deploy@v1
+        with:
+          function-name: ${{ env.LAMBDA_FUNCTION_NAME }}
+          image-uri: ${{ steps.build-image.outputs.image }}
+          package-type: Image
