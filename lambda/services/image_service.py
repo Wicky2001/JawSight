@@ -1,9 +1,13 @@
 import io
+import os
 import cv2
 import torch
 import numpy as np
 import pandas as pd
 from rembg import new_session
+
+# Set U2NET_HOME to point to the local models folder so rembg uses the local onnx model
+os.environ["U2NET_HOME"] = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "models"))
 
 from config.settings import (
     NUM_RESAMPLED_POINTS,
@@ -156,13 +160,16 @@ def process_front_face(image_key, csv_key):
     
     df = pd.read_csv(io.StringIO(csv_string))
     
-    nose_x_px = df["Nose_X_Px"].iloc[0]
-    nose_y_px = df["Nose_Y_Px"].iloc[0]
-    nose_pt = (int(nose_x_px), int(nose_y_px))
-    
     img_w_csv = df["Image_W"].iloc[0]
     img_h_csv = df["Image_H"].iloc[0]
-    scale_master = np.sqrt(img_w_csv**2 + img_h_csv**2)
+    scale_x = w / img_w_csv
+    scale_y = h / img_h_csv
+    
+    nose_x_px = df["Nose_X_Px"].iloc[0] * scale_x
+    nose_y_px = df["Nose_Y_Px"].iloc[0] * scale_y
+    nose_pt = (int(nose_x_px), int(nose_y_px))
+    
+    scale_master = np.sqrt(w**2 + h**2)
     
     df_filtered = df[df["Landmark_MP_ID"] != 1].copy()
     df_filtered = df_filtered.sort_values(by="Landmark_MP_ID")
@@ -173,7 +180,7 @@ def process_front_face(image_key, csv_key):
         raise ValueError(f"Expected 35 landmarks after filtering nose, but got {len(fin_coords)}")
     
     input_tensor = torch.tensor(fin_coords.flatten()).unsqueeze(0)
-    pre_pixel_coords = df_filtered[["Refined_X_Px", "Refined_Y_Px"]].values
+    pre_pixel_coords = df_filtered[["Refined_X_Px", "Refined_Y_Px"]].values * np.array([scale_x, scale_y])
 
     with torch.no_grad():
         logger.info("✅ SUCCESS: Running front face prediction model...")
