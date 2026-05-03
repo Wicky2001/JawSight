@@ -1,6 +1,8 @@
 import {Route,Routes} from 'react-router-dom';
 import { Activity } from 'lucide-react';
 
+
+
 // pages
 import { InferenceComponent } from './pages/inference/Inference';
 
@@ -10,6 +12,7 @@ import './App.css';
 
 function App() {
   return (
+  
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
       
       {/* Global Navigation */}
@@ -34,6 +37,8 @@ function App() {
      
       
     </div>
+
+  
   );
 }
 
