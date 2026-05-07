@@ -52,3 +52,36 @@ END RequestId: e7916560-fecd-4dbd-be9d-fc1f263665c6
 REPORT RequestId: e7916560-fecd-4dbd-be9d-fc1f263665c6  Duration: 19714.18 ms   Billed Duration: 19715 ms    Memory Size: 3008 MB    Max Memory Used: 3008 MB
 
 REPORT RequestId: 0169d4d3-24d6-4d3c-9b7f-22ca0ca29708  Init Duration: 0.12 ms  Duration: 71309.07 ms        Billed Duration: 71310 ms       Memory Size: 3008 MB    Max Memory Used: 3008 MB
+
+
+
+
+
+
+
+
+Frontend
+   ↓
+User clicks "Continue with Google"
+   ↓
+Frontend redirects user to backend
+   ↓
+Backend redirects user to Google
+   ↓
+Google login screen appears
+   ↓
+User logs in + gives permission
+   ↓
+Google redirects BACK to backend callback URL
+   ↓
+Backend receives authorization code
+   ↓
+Backend exchanges code with Google for tokens
+   ↓
+Backend fetches user profile from Google
+   ↓
+Backend creates YOUR app user/session/JWT
+   ↓
+Backend sends auth cookies to browser
+   ↓
+User logged into YOUR app

@@ -22,6 +22,58 @@ This is a Monorepo containing a full-stack surgical jaw prediction application.
 - **Validation**: Use Joi schemas from the `/shared` folder for both Frontend and Backend.
 - **React**: Functional components + Hooks only. Tailwind CSS for styling.
 
+
+## Backend-Specific Guidelines
+- **Authentication**: JWT-based with Google OAuth. Store tokens in HTTP-only cookies.
+- **Error Handling**: use `ApiError` class in `src/helpers/classes/ApiError.ts`.
+- **HTTP Status Codes**: Use `http-status` package for all status codes in the backend.
+- **Creating Controllers**: Wrap every controller function inside `catchAsync` from `src/helpers/error.handlers.ts`.
+
+- **Database Operations**:
+  - Use `db.sequelize.transaction(async (t) => { ... })` for operations involving multiple database writes.
+  - Always pass `{ transaction: t }` to all queries inside the transaction.
+  - Fetch the existing record first before update/delete operations.
+  - If the record is not found, throw:
+  
+    ```ts
+    throw new ApiError(status.NOT_FOUND, "Resource not found");
+    ```
+
+  - Keep transaction logic structured as:
+  
+    ```ts
+    await db.sequelize.transaction(async (t) => {
+      const existing = await db.Model.findOne({
+        where: {
+          id,
+          // additional conditions if needed
+        },
+        transaction: t,
+      });
+
+      if (!existing) {
+        throw new ApiError(status.NOT_FOUND, "Resource not found");
+      }
+
+      await existing.update(
+        {
+          // fields to update
+        },
+        { transaction: t },
+      );
+
+      // optional related operations
+      // optional audit logs
+    });
+    ```
+
+  - Only include fields/conditions that actually exist in the model.
+  - Audit logging should be done inside the same transaction when applicable.        
+
+
+
+
+
 ## Mandatory Task Flow
 1. Check `/migrations` before proposing any RDS/Database changes.
 2. Verify SSM parameter storage for any new AWS resource created in `/infra`.

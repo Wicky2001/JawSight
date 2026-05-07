@@ -1,7 +1,8 @@
 'use strict';
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('refresh_tokens', {
       id: {
         allowNull: false,
@@ -25,29 +26,28 @@ module.exports = {
       },
       is_active: {
         type: Sequelize.BOOLEAN,
+        allowNull: false,
         defaultValue: true
       },
-      created_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-      },
-      updated_at: {
-        allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-      },
       expires_at: {
+        type: Sequelize.DATE,
+        allowNull: false
+      },
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      deleted_at: {
-        type: Sequelize.DATE,
-        allowNull: true
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      deletedAt: {
+        type: Sequelize.DATE
       }
     });
   },
-  down: async (queryInterface, Sequelize) => {
+
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('refresh_tokens');
   }
 };

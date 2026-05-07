@@ -1,7 +1,8 @@
 'use strict';
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('patients', {
       id: {
         allowNull: false,
@@ -17,7 +18,7 @@ module.exports = {
           key: 'id'
         },
         onUpdate: 'CASCADE',
-        onDelete: 'CASCADE'
+        onDelete: 'RESTRICT'
       },
       name: {
         type: Sequelize.STRING(255),
@@ -25,29 +26,26 @@ module.exports = {
       },
       age: {
         type: Sequelize.INTEGER,
-        allowNull: true
+        allowNull: false
       },
       email: {
-        type: Sequelize.STRING(255),
-        allowNull: true
+        type: Sequelize.STRING(255)
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        type: Sequelize.DATE
       },
-      deleted_at: {
-        type: Sequelize.DATE,
-        allowNull: true
+      deletedAt: {
+        type: Sequelize.DATE
       }
     });
   },
-  down: async (queryInterface, Sequelize) => {
+
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('patients');
   }
 };
