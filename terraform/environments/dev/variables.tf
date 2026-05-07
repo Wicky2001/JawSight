@@ -13,7 +13,14 @@ variable "environment" {
 variable "aws_region" {
   description = "AWS region"
   type        = string
-  default     = "us-east-1"
+  default     = "ap-south-1"
+}
+
+variable "aws_profile" {
+  description = "AWS CLI profile to use for deployment"
+  type        = string
+  default     = "jawsight-dev-terraform"
+  
 }
 
 variable "lambda_timeout" {
@@ -25,5 +32,11 @@ variable "lambda_timeout" {
 variable "lambda_memory" {
   description = "Lambda memory in MB"
   type        = number
-  default     = 2048
+  default     = 3008
+}
+
+variable "webhook_url" {
+  description = "Webhook URL for SNS notifications"
+  type        = string
+  default     = "https://reluctant-ferocity-monoxide.ngrok-free.dev/api/predictions/sns-webhook" # Placeholder
 }

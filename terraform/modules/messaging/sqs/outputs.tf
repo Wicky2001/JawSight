@@ -1,19 +1,14 @@
-output "image_jobs_queue_arn" {
-  description = "ARN of the image jobs queue"
-  value       = aws_sqs_queue.image_jobs.arn
+output "image_processing_queue_arn" {
+  description = "ARN of the image processing queue"
+  value       = aws_sqs_queue.image_processing_queue.arn
 }
 
-output "image_jobs_queue_url" {
-  description = "URL of the image jobs queue"
-  value       = aws_sqs_queue.image_jobs.url
+output "image_processing_queue_url" {
+  description = "URL of the image processing queue"
+  value       = aws_sqs_queue.image_processing_queue.url
 }
 
-output "processed_results_queue_arn" {
-  description = "ARN of the processed results queue"
-  value       = aws_sqs_queue.processed_results.arn
-}
-
-output "processed_results_queue_url" {
-  description = "URL of the processed results queue"
-  value       = aws_sqs_queue.processed_results.url
+output "image_processing_dlq_arn" {
+  description = "ARN of the image processing dead letter queue"
+  value       = aws_sqs_queue.image_processing_dlq.arn
 }

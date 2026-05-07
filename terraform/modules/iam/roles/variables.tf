@@ -10,32 +10,26 @@ variable "environment" {
   default     = "dev"
 }
 
-variable "input_bucket_arn" {
-  description = "ARN of input bucket"
+variable "s3_bucket_arn" {
+  description = "ARN of data bucket"
   type        = string
   default     = ""
 }
 
-variable "output_bucket_arn" {
-  description = "ARN of output bucket"
-  type        = string
-  default     = ""
-}
-
-variable "image_jobs_queue_arn" {
+variable "image_processing_queue_arn" {
   description = "ARN of image jobs sqs queue"
-  type        = string
-  default     = ""
-}
-
-variable "processed_results_queue_arn" {
-  description = "ARN of processed results sqs queue"
   type        = string
   default     = ""
 }
 
 variable "sns_topic_arn" {
   description = "ARN of sns topic"
+  type        = string
+  default     = ""
+}
+
+variable "ecr_repository_arn" {
+  description = "ARN of ecr repository for lambda images"
   type        = string
   default     = ""
 }

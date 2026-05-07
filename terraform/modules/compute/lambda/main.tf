@@ -5,18 +5,79 @@ resource "aws_lambda_function" "processor" {
   image_uri     = "${var.ecr_repository_url}:latest"
   timeout       = var.timeout
   memory_size   = var.memory
-
+  
+  # Additional settings from your current Lambda function
+  architectures = ["x86_64"]
+  
+  # Ephemeral storage configuration
+  ephemeral_storage {
+    size = 512  # MB
+  }
+  
+  # Logging configuration
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${var.project_name}-${var.environment}-lambda"
+  }
+  
+  # Tracing configuration
+  tracing_config {
+    mode = "PassThrough"
+  }
+  
+  # Recursive loop detection
+  dead_letter_config {
+    target_arn = ""  # Empty means terminate on recursive loops
+  }
+  
+  # Environment variables (expanded from your current setup)
   environment {
     variables = {
-      INPUT_BUCKET  = var.input_bucket_name
-      OUTPUT_BUCKET = var.output_bucket_name
-      SNS_TOPIC_ARN = var.sns_topic_arn
-      QUEUE_URL     = var.processed_results_queue_url
+      BUCKET_NAME     = var.s3_bucket_name
+      SNS_TOPIC_ARN   = var.sns_topic_arn
+      ENVIRONMENT     = var.environment
     }
+  }
+  
+  # Optional: Add tags for better resource management
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-lambda"
+    Environment = var.environment
+    Purpose     = "Image processing"
+  }
+  
+  # Ensure the function is updated when the image changes
+  depends_on = [
+    aws_cloudwatch_log_group.lambda_logs
+  ]
+}
+
+# Create CloudWatch Log Group with retention policy
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name              = "/aws/lambda/${var.project_name}-${var.environment}-lambda"
+  retention_in_days = 14  # Adjust retention as needed
+  
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-lambda-logs"
+    Environment = var.environment
   }
 }
 
 resource "aws_lambda_event_source_mapping" "sqs_trigger" {
-  event_source_arn = var.image_jobs_queue_arn
+  event_source_arn = var.image_processing_queue_arn
   function_name    = aws_lambda_function.processor.arn
+  
+  # Additional SQS event source mapping settings
+  batch_size                         = 10     # Process up to 10 messages at once
+  maximum_batching_window_in_seconds = 5      # Wait up to 5 seconds to collect messages
+  
+  # Error handling for SQS processing
+  function_response_types = ["ReportBatchItemFailures"]
+  
+  # Optional: Configure scaling behavior
+  scaling_config {
+    maximum_concurrency = 100  # Limit concurrent executions
+  }
 }
+
+

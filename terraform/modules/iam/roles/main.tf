@@ -29,9 +29,16 @@ resource "aws_iam_policy" "lambda_policy" {
           "s3:PutObject"
         ]
         Resource = [
-          "${var.input_bucket_arn}/*",
-          "${var.output_bucket_arn}/*"
+          "${var.s3_bucket_arn}/*",
+          var.s3_bucket_arn
         ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:ListBucket"
+        ],
+        "Resource" : "${var.s3_bucket_arn}"
       },
       {
         Effect = "Allow"
@@ -41,8 +48,7 @@ resource "aws_iam_policy" "lambda_policy" {
           "sqs:GetQueueAttributes"
         ]
         Resource = [
-          var.image_jobs_queue_arn,
-          var.processed_results_queue_arn
+          "${var.image_processing_queue_arn}"
         ]
       },
       {
@@ -50,7 +56,7 @@ resource "aws_iam_policy" "lambda_policy" {
         Action = [
           "sns:Publish"
         ]
-        Resource = [var.sns_topic_arn]
+        Resource = ["${var.sns_topic_arn}"]
       },
       {
         Effect = "Allow"
@@ -59,16 +65,23 @@ resource "aws_iam_policy" "lambda_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = ["arn:aws:logs:*:*:*"]
+        Resource = "arn:aws:logs:*:*:*"
       },
       {
         Effect = "Allow"
         Action = [
-          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
           "ecr:BatchGetImage",
           "ecr:GetDownloadUrlForLayer"
         ]
         Resource = ["*"]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ecr:GetAuthorizationToken"
+        ],
+        "Resource" : "${var.ecr_repository_arn}"
       }
     ]
   })

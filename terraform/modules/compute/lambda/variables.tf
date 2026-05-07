@@ -34,14 +34,8 @@ variable "memory" {
   default     = 2048
 }
 
-variable "input_bucket_name" {
-  description = "Input bucket name"
-  type        = string
-  default     = ""
-}
-
-variable "output_bucket_name" {
-  description = "Output bucket name"
+variable "s3_bucket_name" {
+  description = "Data bucket name"
   type        = string
   default     = ""
 }
@@ -52,14 +46,8 @@ variable "sns_topic_arn" {
   default     = ""
 }
 
-variable "processed_results_queue_url" {
-  description = "Processed SQS URL"
-  type        = string
-  default     = ""
-}
-
-variable "image_jobs_queue_arn" {
-  description = "Input SQS ARN"
+variable "image_processing_queue_arn" {
+  description = "Image processing SQS ARN"
   type        = string
   default     = ""
 }

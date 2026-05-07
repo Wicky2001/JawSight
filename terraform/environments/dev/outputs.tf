@@ -1,41 +1,26 @@
-output "input_bucket_name" {
-  description = "Input Bucket Name"
-  value       = module.s3.input_bucket_name
+output "s3_bucket_name" {
+  description = "Data Bucket Name"
+  value       = module.s3.s3_bucket_name
 }
 
-output "input_bucket_arn" {
-  description = "Input Bucket ARN"
-  value       = module.s3.input_bucket_arn
+output "s3_bucket_arn" {
+  description = "Data Bucket ARN"
+  value       = module.s3.s3_bucket_arn
 }
 
-output "output_bucket_name" {
-  description = "Output Bucket Name"
-  value       = module.s3.output_bucket_name
+output "image_processing_queue_arn" {
+  description = "Image Processing SQS ARN"
+  value       = module.sqs.image_processing_queue_arn
 }
 
-output "output_bucket_arn" {
-  description = "Output Bucket ARN"
-  value       = module.s3.output_bucket_arn
+output "image_processing_queue_url" {
+  description = "Image Processing SQS URL"
+  value       = module.sqs.image_processing_queue_url
 }
 
-output "image_jobs_queue_arn" {
-  description = "Image Jobs SQS ARN"
-  value       = module.sqs.image_jobs_queue_arn
-}
-
-output "image_jobs_queue_url" {
-  description = "Image Jobs SQS URL"
-  value       = module.sqs.image_jobs_queue_url
-}
-
-output "processed_results_queue_arn" {
-  description = "Processed Results SQS ARN"
-  value       = module.sqs.processed_results_queue_arn
-}
-
-output "processed_results_queue_url" {
-  description = "Processed Results SQS URL"
-  value       = module.sqs.processed_results_queue_url
+output "image_processing_dlq_arn" {
+  description = "Image Processing DLQ ARN"
+  value       = module.sqs.image_processing_dlq_arn
 }
 
 output "sns_topic_arn" {

@@ -7,13 +7,14 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.0"
+      version = "6.44.0"
     }
   }
 }
 
 provider "aws" {
   region = var.aws_region
+  profile = var.aws_profile
 }
 
 module "s3" {
@@ -37,7 +38,7 @@ module "sns" {
 module "sns_subscription" {
   source      = "../../modules/messaging/subscriptions"
   topic_arn   = module.sns.topic_arn
-  webhook_url = "https://example.com/webhook" # Placeholder
+  webhook_url = var.webhook_url
 }
 
 module "ecr" {
@@ -50,10 +51,9 @@ module "iam" {
   source                      = "../../modules/iam/roles"
   project_name                = var.project_name
   environment                 = var.environment
-  input_bucket_arn            = module.s3.input_bucket_arn
-  output_bucket_arn           = module.s3.output_bucket_arn
-  image_jobs_queue_arn        = module.sqs.image_jobs_queue_arn
-  processed_results_queue_arn = module.sqs.processed_results_queue_arn
+  s3_bucket_arn               = module.s3.s3_bucket_arn
+  image_processing_queue_arn  = module.sqs.image_processing_queue_arn
+  ecr_repository_arn          = module.ecr.repository_arn
   sns_topic_arn               = module.sns.topic_arn
 }
 
@@ -65,9 +65,7 @@ module "lambda" {
   ecr_repository_url          = module.ecr.repository_url
   timeout                     = var.lambda_timeout
   memory                      = var.lambda_memory
-  input_bucket_name           = module.s3.input_bucket_name
-  output_bucket_name          = module.s3.output_bucket_name
+  s3_bucket_name              = module.s3.s3_bucket_name
   sns_topic_arn               = module.sns.topic_arn
-  processed_results_queue_url = module.sqs.processed_results_queue_url
-  image_jobs_queue_arn        = module.sqs.image_jobs_queue_arn
+  image_processing_queue_arn  = module.sqs.image_processing_queue_arn
 }
