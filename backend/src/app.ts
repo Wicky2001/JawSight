@@ -1,10 +1,11 @@
 import express from "express";
 import mainRouter from "./routes/index.js";
 import cors from "cors";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
+import compression from "compression";
 
 const app = express();
-app.use(express.json())
-app.use(express.text()); 
 
 const whitelist = (process.env.CORS_ORIGINS || "http://localhost:3000")
   .split(",")
@@ -24,7 +25,13 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use(helmet());
 app.use(express.json());
+// app.use(responseHandler); // Note: Uncomment and import responseHandler when available
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+app.use(compression() as any);
+app.use(express.text());
 
 // Mount main routes
 app.use("/api", mainRouter);

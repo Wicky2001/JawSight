@@ -4,12 +4,6 @@ import axios from 'axios';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/'; 
 
 
-let accessToken: string | null = null;
-
-export const setAccessToken = (token: string) => {
-  accessToken = token;
-};
-
 
 
 const client = axios.create({
@@ -17,12 +11,7 @@ const client = axios.create({
   withCredentials: true,
 });
 
-client.interceptors.request.use((config) => {
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-  return config;
-});
+
 
 client.interceptors.response.use(
   (response) => response,
@@ -33,12 +22,9 @@ client.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // 🔥 call refresh endpoint
-        const res = await client.post("/auth/refresh");
-        setAccessToken(res.data.accessToken);
-
-
-        // retry original request
+        // call refresh endpoint
+        await client.post("/auth/refresh");
+  
         return client(originalRequest);
       } catch (err) {
         // logout if refresh fails

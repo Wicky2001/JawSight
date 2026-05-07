@@ -19,17 +19,16 @@ export const SocketProvider = ({ children }: Props) => {
   useEffect(()=>{
     if(!isAuthenticated || !user) return;   
 
-    const newSocket = io(BACKEND_URL,{
+    const socket = io(BACKEND_URL,{
         autoConnect:true,
+        withCredentials:true,
     });
 
-    //register after user is authenticated
-    newSocket.emit("register", { userId: user.id });
 
-    setSocket(newSocket);
+    setSocket(socket);
 
     return () => {
-      newSocket.disconnect();
+      socket.disconnect();
     };
   }, [isAuthenticated,user]);
 
