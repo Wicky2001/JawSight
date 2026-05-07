@@ -1,5 +1,5 @@
 import { Activity, ShieldCheck, ArrowRight } from 'lucide-react';
-import { useLocation,useNavigate } from 'react-router-dom';
+import { useLocation} from 'react-router-dom';
 
 // --- SVG Icons for OAuth Providers ---
 
@@ -29,17 +29,13 @@ const FacebookIcon = () => (
 const Login = () => {
 
   const location = useLocation();
-  const navigate = useNavigate();
   const from = location.state?.from?.pathname || "/";
 
 
   const handleGoogleLogin = () => {
-    console.log("Initiating Google OAuth flow...");
-    // Example: window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/google`;
-
-    //When login success
-    navigate(from);
-  };
+  window.location.href =
+    "http://localhost:5000/api/auth/google?from=" + encodeURIComponent(from);
+};
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">

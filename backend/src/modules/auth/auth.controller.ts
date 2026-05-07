@@ -5,6 +5,7 @@ import { createRefreshToken } from "../../helpers/auth/refresh.js";
 
 export const googleCallbackController = catchAsync(
   async (req: Request, res: Response) => {
+    let from = req.query.state as string || "/home";
     const doctor = req.user as any;
 
     const accessToken = createAccessToken(doctor.id);
@@ -22,6 +23,10 @@ export const googleCallbackController = catchAsync(
       sameSite: "lax",
     });
 
-    res.redirect(process.env.FRONTEND_URL!);
+    const baseUrl = process.env.FRONTEND_URL!.replace(/\/$/, "");
+    if (!from.startsWith("/")) {
+      from = "/" + from;
+    }
+    res.redirect(`${baseUrl}${from}`);
   }
 );
