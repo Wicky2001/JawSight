@@ -85,3 +85,61 @@ Backend creates YOUR app user/session/JWT
 Backend sends auth cookies to browser
    ↓
 User logged into YOUR app
+
+
+
+
+lambda description
+
+currently I have lambda function which get image from ecr and spin up the function. This lamdafunction
+is resposible for grap image urls from SQS. Use that urls to download images from s3 bucket then process those images
+save result images to s3 bucket. send message to SQS. Also I need to create a subscription in SNS so My 
+backend will subscribe to that subscription hrough webhook. This is what should happen in dev enviroment. 
+
+
+When it comes to production there will be multiple services. for now I only want to spin up things need for
+dev environment.
+
+
+
+terraform/
+│
+├── environments/
+│   ├── dev/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── terraform.tfvars
+│   │   └── outputs.tf
+│   │
+│   └── prod/
+│       ├── main.tf
+│       ├── variables.tf
+│       ├── terraform.tfvars
+│       └── outputs.tf
+│
+├── modules/
+│   │
+│   ├── networking/
+│   │   ├── vpc/
+│   │   ├── alb/
+│   │   └── security-groups/
+│   │
+│   ├── messaging/
+│   │   ├── sqs/
+│   │   ├── sns/
+│   │   └── subscriptions/
+│   │
+│   ├── compute/
+│   │   ├── lambda/
+│   │   ├── ecs/
+│   │   └── ecr/
+│   │
+│   ├── storage/
+│   │   └── s3/
+│   │
+│   └── iam/
+│       └── roles/
+│
+└── shared/
+    ├── providers.tf
+    └── versions.tf
