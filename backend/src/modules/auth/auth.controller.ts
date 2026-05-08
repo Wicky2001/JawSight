@@ -1,10 +1,14 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../helpers/error.handlers.js";
 import { createAccessToken } from "../../helpers/auth/access.js";
 import { createRefreshToken } from "../../helpers/auth/refresh.js";
+import passport from "passport";
+import { de } from "zod/locales";
+
 
 export const googleCallbackController = catchAsync(
   async (req: Request, res: Response) => {
+    debugger;
     let from = req.query.state as string || "/home";
     const doctor = req.user as any;
 
@@ -29,4 +33,32 @@ export const googleCallbackController = catchAsync(
     }
     res.redirect(`${baseUrl}${from}`);
   }
+);
+
+
+
+export const meController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate(
+      "access-jwt",
+      { session: false },
+      async (err: any, jwtPayload: any) => {
+        if (err || !jwtPayload || jwtPayload.id === undefined) {
+          return res.status(401).json({
+            message: "Unauthorized. Please login.",
+          });
+        }
+
+
+        return res.status(200).json({
+          success: true,
+          message: "Authenticated successfully",
+          user: {
+            id: jwtPayload.id,
+          },
+        
+        });
+      },
+    )(req, res, next);
+  },
 );

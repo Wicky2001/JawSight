@@ -6,7 +6,7 @@
   "description": "api of mandibular retrogathia and prognathism",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*.ts' --watch '../shared/src/**/*.ts' --exec \"node --loader ts-node/esm -r tsconfig-paths/register\" src/index.ts",
+    "dev": "cross-env NODE_OPTIONS=\"--trace-uncaught --trace-deprecation --trace-warnings\" NODE_ENV=development nodemon --verbose --watch \"src\" --watch \"../shared/src\" --ext ts,js,json --exec \"tsx --inspect-brk src/index.ts\"",
     "build": "tsc",
     "start": "cross-env NODE_ENV=production node dist/index.js"
   },
@@ -53,6 +53,7 @@
     "redis": "^4.6.0",
     "sequelize": "^6.37.7",
     "socket.io": "^4.8.3",
+    "tsx": "^4.21.0",
     "zod": "^4.0.0"
   }
 }

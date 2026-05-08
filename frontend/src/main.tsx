@@ -10,7 +10,7 @@ import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <AuthProvider>
       <SocketProvider>
         <BrowserRouter>
@@ -18,5 +18,5 @@ createRoot(document.getElementById('root')!).render(
         </BrowserRouter>
       </SocketProvider>
     </AuthProvider>
-  </StrictMode>,
+  // </StrictMode>,
 )

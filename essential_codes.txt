@@ -443,3 +443,5 @@ passing shared values to modules
     }
   ]
 }
+    // "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*.ts' --watch '../shared/src/**/*.ts' --exec \"node --loader ts-node/esm -r tsconfig-paths/register\" src/index.ts",
+    "dev": "cross-env NODE_OPTIONS=\"--trace-uncaught --trace-deprecation --trace-warnings\" NODE_ENV=development nodemon --verbose --watch \"src\" --watch \"../shared/src\" --ext ts,js,json --exec \"tsx src/index.ts\"",

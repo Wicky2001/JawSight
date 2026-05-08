@@ -4,6 +4,10 @@ import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import compression from "compression";
+import passport from "./helpers/auth/passport.js";
+import { errorConverter,errorHandler } from "./helpers/error.handlers.js";
+import ApiError from "./helpers/classes/ApiError.js";
+import httpStatus from "http-status";
 
 const app = express();
 
@@ -23,11 +27,12 @@ const corsOptions = {
   },
 };
 
+
+app.use(passport.initialize());
 app.use(cors(corsOptions));
 
 app.use(helmet());
 app.use(express.json());
-// app.use(responseHandler); // Note: Uncomment and import responseHandler when available
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(compression() as any);
@@ -35,5 +40,13 @@ app.use(express.text());
 
 // Mount main routes
 app.use("/api", mainRouter);
+
+// 404 handler
+app.use((req, res, next) => {
+  next(new ApiError(httpStatus.NOT_FOUND, "Page Not Found"));
+});
+
+app.use(errorConverter);
+app.use(errorHandler);
 
 export default app;

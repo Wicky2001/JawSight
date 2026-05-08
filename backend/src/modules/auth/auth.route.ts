@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
-import { googleCallbackController } from "./auth.controller.js";
+import { googleCallbackController, meController } from "./auth.controller.js";
 
 const router = Router();
 
@@ -24,5 +24,9 @@ router.get(
   }),
   googleCallbackController
 );
+
+
+
+router.get("/me",meController);
 
 export default router;

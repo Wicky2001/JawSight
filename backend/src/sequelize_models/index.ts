@@ -1,3 +1,8 @@
+// import dotenv from "dotenv";
+// dotenv.config({
+//   debug:true,
+// });
+
 import { Sequelize } from 'sequelize';
 import { Doctor } from './Doctor.js';
 import { Patient } from './Patient.js';
@@ -14,7 +19,8 @@ const sequelize = new Sequelize(process.env.DB_NAME!, process.env.DB_USER!, proc
   logging: false, 
 });
 
-const models = {
+const db = {
+  sequelize,  
   Doctor,
   Patient,
   PatientImage,
@@ -22,19 +28,19 @@ const models = {
   AuditLog,
 };
 
-// Initialize models
-Object.values(models).forEach((model) => {
+// Initialize db
+Object.values(db).forEach((model) => {
   if ('initModel' in model) {
     (model as any).initModel(sequelize);
   }
 });
 
 // Set associations
-Object.values(models).forEach((model) => {
+Object.values(db).forEach((model) => {
   if ('associate' in model) {
-    (model as any).associate(models);
+    (model as any).associate(db);
   }
 });
 
-export { sequelize, models };
-export default models;
+
+export default db;

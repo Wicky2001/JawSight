@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 // --- API Client Setup ---
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'; 
 
@@ -11,22 +12,35 @@ const client = axios.create({
   withCredentials: true,
 });
 
+const refreshClient = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
+
+
 
 
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
+    debugger;
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
+
+        debugger;
         // call refresh endpoint
-        await client.post("/auth/refresh");
+        const response = await refreshClient.post("/auth/refresh");
+        console.log(response.status);
   
+        debugger;
         return client(originalRequest);
+
       } catch (err) {
+        debugger;
         // logout if refresh fails
         window.location.href = "/login";
         return Promise.reject(err);

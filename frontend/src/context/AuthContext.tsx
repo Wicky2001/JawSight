@@ -4,7 +4,6 @@ import { api } from  '../helpers/apiClient/apiClient';
 
 type User = {
   id: string;
-  username: string;
 };
 
 type AuthContextType = {
@@ -28,6 +27,12 @@ export const AuthProvider = ({ children }: Props) => {
   const isAuthenticated = !!user;
 
   useEffect(() => {
+
+
+    if (window.location.pathname === "/login") {
+    setIsLoading(false);
+    return;
+  }
     const initAuth = async () => {
       try {
         const res = await api.get("/auth/me");

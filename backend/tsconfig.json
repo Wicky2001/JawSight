@@ -11,7 +11,8 @@
     "strict": true,                    /* Critical for research accuracy */
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
   },
   "include": ["src", "../shared/src/**/*"] /* Tell TS to look in both folders */
 }
