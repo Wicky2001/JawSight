@@ -8,7 +8,7 @@ export const findOrCreateGoogleUser = async (
 ) => {
 
   console.log("Google profile:", profile);
-  debugger;
+  
 
   const googleId = profile.id;
 

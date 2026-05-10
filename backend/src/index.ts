@@ -6,12 +6,13 @@ import { initializeSocket } from "./helpers/socket.helper.js";
 
 const PORT = process.env.PORT || 5000;
 
+
 const startServer = async () => {
   try {
 
 
     await db.sequelize.authenticate();		
-	console.log("Database synced (force: true)");
+	  console.log("Database synced (force: true)");
 	
     const server = http.createServer(app);
     const io = initializeSocket(server);

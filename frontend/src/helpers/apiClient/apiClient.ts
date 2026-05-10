@@ -26,7 +26,7 @@ client.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    debugger;
+    
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -42,7 +42,7 @@ client.interceptors.response.use(
         return client(originalRequest);
 
       } catch (err) {
-        debugger;
+        
         // logout if refresh fails
         window.location.href = `/login?from=${encodeURIComponent(currentPath)}`;
         return Promise.reject(err);

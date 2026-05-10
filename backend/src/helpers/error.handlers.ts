@@ -1,5 +1,5 @@
 import httpStatus from "http-status";
-import ApiError from "./classes/ApiError.js";
+import ApiError from "./ApiError.js";
 import { Request, Response, NextFunction, RequestHandler } from "express";
 
 export const errorConverter = (

@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import httpStatus from "http-status";
 import { doctorSocketMap } from "../../helpers/socket.helper.js";
 import { pushToSqsQueue } from "./predictions.service.js";
-import ApiError from "../../helpers/classes/ApiError.js";
+import ApiError from "../../helpers/ApiError.js";
 
 
 
@@ -43,7 +43,7 @@ export const handleRealSnsWebhook = async (req: Request, res: Response) => {
       // The payload you sent from Lambda is stringified inside the 'Message' property
       const response = JSON.parse(body.Message); 
       console.log("Parsed SNS Message:", response);
-      debugger;
+      
       const { doctor_id, patient_id, imageUrl, iterationId } = response.data;
 
       const io = req.app.get("socketio");

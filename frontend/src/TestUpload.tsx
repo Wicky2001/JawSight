@@ -13,7 +13,7 @@ const TestUpload: React.FC = () => {
     setSocket(newSocket);
     newSocket.emit("register", "doc_123");
     newSocket.on("prediction_complete", (data) => {
-      debugger;
+      
       setIsLoading(false);
       setResult(data);
     });
@@ -25,7 +25,7 @@ const TestUpload: React.FC = () => {
   const handleUpload = async () => {
     setIsLoading(true);
     setResult(null);
-    debugger;
+    
 
     try {
       const url = 'http://localhost:5000/api/predictions/upload';

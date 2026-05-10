@@ -19,6 +19,8 @@ export const SocketProvider = ({ children }: Props) => {
   useEffect(()=>{
     if(!isAuthenticated || !user) return;   
 
+    debugger;
+
     const socket = io(BACKEND_URL,{
         autoConnect:true,
         withCredentials:true,
@@ -26,6 +28,18 @@ export const SocketProvider = ({ children }: Props) => {
 
 
     setSocket(socket);
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server with ID:", socket.id);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.error("Connection error:", err);
+    });
+
+    //disconnect socket on unmount or when user logs out
+    socket.on("disconnect", (reason) => {
+      console.log("Disconnected from Socket.IO server. Reason:", reason);
+    });
 
     return () => {
       socket.disconnect();

@@ -2,7 +2,7 @@ import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
 import { verifyAccessToken } from "./auth/access.js";
 import cookie from "cookie";
-import ApiError from "./classes/ApiError.js";
+import ApiError from "./ApiError.js";
 import { status } from "http-status";
 export const doctorSocketMap = new Map<string, string>();
 
@@ -14,10 +14,16 @@ const parseCookies = (cookieString: string) => {
   }, {});
 };
 
+
+const whitelist = (process.env.CORS_ORIGINS || "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 export function initializeSocket(httpServer: HttpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: "*", 
+      origin: whitelist, 
       methods: ["GET", "POST"],
       credentials: true, 
     },
@@ -39,16 +45,16 @@ export function initializeSocket(httpServer: HttpServer) {
     }
 
     const decoded = verifyAccessToken(accessToken);
-    if (!decoded || !decoded.userId) {
+    if (!decoded || !decoded.id) {
       return next(new ApiError(status.UNAUTHORIZED, "Authentication error: Invalid access token"));
     }
 
-    (socket as any).userId = decoded.userId;
+    (socket as any).id = decoded.id;
     next();
   });
 
   io.on("connection", (socket: Socket) => {
-    const doctor_id = (socket as any).userId;
+    const doctor_id = (socket as any).id;
     
     doctorSocketMap.set(doctor_id, socket.id);
     console.log(`Doctor ${doctor_id} connected and registered with socket ID ${socket.id}`);

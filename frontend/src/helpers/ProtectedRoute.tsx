@@ -11,7 +11,7 @@ const ProtectedRoute = () => {
   }
 
   if (!isAuthenticated) {
-    debugger;
+    
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 

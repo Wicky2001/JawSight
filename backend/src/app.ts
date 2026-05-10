@@ -6,8 +6,9 @@ import cookieParser from "cookie-parser";
 import compression from "compression";
 import passport from "./helpers/auth/passport.js";
 import { errorConverter,errorHandler } from "./helpers/error.handlers.js";
-import ApiError from "./helpers/classes/ApiError.js";
+import ApiError from "./helpers/ApiError.js";
 import httpStatus from "http-status";
+import morgan from "morgan";
 
 const app = express();
 
@@ -27,7 +28,7 @@ const corsOptions = {
   },
 };
 
-
+app.use(morgan("combined")); // Use 'combined' for detailed logging, or 'dev' for concise output in development
 app.use(passport.initialize());
 app.use(cors(corsOptions));
 

@@ -8,8 +8,11 @@ import passport from "passport";
 
 export const googleCallbackController = catchAsync(
   async (req: Request, res: Response) => {
-    debugger;
+
+   debugger;
+    
     let from = req.query.state as string || "/home";
+    debugger;
     const doctor = req.user as any;
 
     const accessToken = createAccessToken(doctor.id);
@@ -44,7 +47,7 @@ export const meController = catchAsync(
       { session: false },
       async (err: any, jwtPayload: any) => {
         if (err || !jwtPayload || jwtPayload.id === undefined) {
-          debugger;
+          
           return res.status(401).json({
             message: "Unauthorized. Please login.",
           });
@@ -74,11 +77,11 @@ export const refreshTokenController = catchAsync(
 
     const decoded = verifyRefreshToken(refreshToken);
 
-    if (!decoded || !decoded.userId) {
+    if (!decoded || !decoded.id) {
       return res.status(401).json({ message: "Invalid or expired refresh token" });
     }
 
-    const newAccessToken = createAccessToken(decoded.userId);
+    const newAccessToken = createAccessToken(decoded.id);
 
     res.cookie("access-token", newAccessToken, {
       httpOnly: true,

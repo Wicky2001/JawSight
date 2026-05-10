@@ -34,7 +34,7 @@ passport.use(
       done,
     ) => {
       try {
-        debugger;
+        
         const user =
           await findOrCreateGoogleUser(profile);
 
@@ -52,7 +52,7 @@ passport.use(
 const cookieExtractor = (req: Request) => {
   let jwtToken = null;
   if (req && req.cookies) {
-    debugger;
+    
     jwtToken = req.cookies["access-token"];
   }
 
