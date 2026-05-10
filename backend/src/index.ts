@@ -10,7 +10,6 @@ const startServer = async () => {
   try {
 
 
-debugger;
     await db.sequelize.authenticate();		
 	console.log("Database synced (force: true)");
 	

@@ -1,5 +1,6 @@
 import { Activity, ShieldCheck, ArrowRight } from 'lucide-react';
-import { useLocation} from 'react-router-dom';
+import { useLocation, useSearchParams} from 'react-router-dom';
+
 
 // --- SVG Icons for OAuth Providers ---
 
@@ -28,9 +29,11 @@ const FacebookIcon = () => (
 
 const Login = () => {
 
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
 
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  debugger;
+  const from = location.state?.from?.pathname || searchParams.get('from') || "/";
 
   const handleGoogleLogin = () => {
   window.location.href =

@@ -9,7 +9,11 @@ import {
 import {
   findOrCreateGoogleUser,
 } from "../../modules/auth/auth.service.js";
-import { de } from "zod/locales";
+
+
+const JWTStrategy = passportJWT.Strategy;
+const ExtractJwt = passportJWT.ExtractJwt;
+const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET as string;
 
 passport.use(
   new GoogleStrategy(
@@ -42,14 +46,14 @@ passport.use(
   ),
 );
 
-const JWTStrategy = passportJWT.Strategy;
-const ExtractJwt = passportJWT.ExtractJwt;
-const secret = process.env.JWT_ACCESS_SECRET as string;
+
+
 
 const cookieExtractor = (req: Request) => {
   let jwtToken = null;
   if (req && req.cookies) {
-    jwtToken = req.cookies["access_token"];
+    debugger;
+    jwtToken = req.cookies["access-token"];
   }
 
   return jwtToken;
@@ -63,7 +67,7 @@ passport.use(
         ExtractJwt.fromAuthHeaderAsBearerToken(),
         cookieExtractor,
       ]),
-      secretOrKey: secret,
+      secretOrKey: ACCESS_TOKEN_SECRET,
       algorithms: ["HS256"],
     },
     (jwtPayload, done) => {

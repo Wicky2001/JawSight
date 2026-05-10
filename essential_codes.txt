@@ -445,3 +445,29 @@ passing shared values to modules
 }
     // "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*.ts' --watch '../shared/src/**/*.ts' --exec \"node --loader ts-node/esm -r tsconfig-paths/register\" src/index.ts",
     "dev": "cross-env NODE_OPTIONS=\"--trace-uncaught --trace-deprecation --trace-warnings\" NODE_ENV=development nodemon --verbose --watch \"src\" --watch \"../shared/src\" --ext ts,js,json --exec \"tsx src/index.ts\"",
+
+
+
+
+
+
+hash =
+''
+key =
+'default'
+pathname =
+'/inference'
+search =
+''
+state =
+null
+unstable_mask =
+undefined
+
+
+db login commands
+
+psql -U app_user -d postgres   - login using local socket connection
+psql -h localhost -p 5432 -U app_user -d postgres - login with password
+\list - list all available dbs
+\c db_name - swicth to another db

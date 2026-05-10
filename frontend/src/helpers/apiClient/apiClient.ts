@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { de } from 'zod/locales';
 
 
 // --- API Client Setup ---
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'; 
-
+const currentPath = window.location.pathname;
 
 
 
@@ -23,26 +24,27 @@ const refreshClient = axios.create({
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
-    debugger;
     const originalRequest = error.config;
+
+    debugger;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
 
-        debugger;
+        
         // call refresh endpoint
         const response = await refreshClient.post("/auth/refresh");
         console.log(response.status);
   
-        debugger;
+        
         return client(originalRequest);
 
       } catch (err) {
         debugger;
         // logout if refresh fails
-        window.location.href = "/login";
+        window.location.href = `/login?from=${encodeURIComponent(currentPath)}`;
         return Promise.reject(err);
       }
     }

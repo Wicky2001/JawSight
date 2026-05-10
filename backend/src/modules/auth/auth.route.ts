@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
-import { googleCallbackController, meController } from "./auth.controller.js";
+import { googleCallbackController, meController, refreshTokenController } from "./auth.controller.js";
 
 const router = Router();
 
@@ -25,7 +25,7 @@ router.get(
   googleCallbackController
 );
 
-
+router.post("/refresh", refreshTokenController);
 
 router.get("/me",meController);
 

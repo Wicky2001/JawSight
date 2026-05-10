@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../helpers/error.handlers.js";
 import { createAccessToken } from "../../helpers/auth/access.js";
-import { createRefreshToken } from "../../helpers/auth/refresh.js";
+import { createRefreshToken, verifyRefreshToken } from "../../helpers/auth/refresh.js";
 import passport from "passport";
-import { de } from "zod/locales";
+
 
 
 export const googleCallbackController = catchAsync(
@@ -44,6 +44,7 @@ export const meController = catchAsync(
       { session: false },
       async (err: any, jwtPayload: any) => {
         if (err || !jwtPayload || jwtPayload.id === undefined) {
+          debugger;
           return res.status(401).json({
             message: "Unauthorized. Please login.",
           });
@@ -61,4 +62,33 @@ export const meController = catchAsync(
       },
     )(req, res, next);
   },
+);
+
+export const refreshTokenController = catchAsync(
+  async (req: Request, res: Response) => {
+    const refreshToken = req.cookies?.["refresh-token"];
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    const decoded = verifyRefreshToken(refreshToken);
+
+    if (!decoded || !decoded.userId) {
+      return res.status(401).json({ message: "Invalid or expired refresh token" });
+    }
+
+    const newAccessToken = createAccessToken(decoded.userId);
+
+    res.cookie("access-token", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Access token refreshed successfully",
+    });
+  }
 );
