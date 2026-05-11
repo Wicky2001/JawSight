@@ -1,7 +1,8 @@
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { s3Client } from "../../helpers/aws.js";
 import {sqsClient} from "../../helpers/aws.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { UploadedDataObject } from "./types.js";
 import db from "../../sequelize_models/index.js";
 import ApiError from "../../helpers/ApiError.js";
@@ -184,5 +185,71 @@ export const saveInputImageKeysToDB = async (
       status.INTERNAL_SERVER_ERROR,
       `Database error: ${err.message || "Unknown database error"}`
     );
+  }
+};
+
+export const saveOutputImageKeysToDB = async (
+  doctorId: number | string,
+  patientId: number | string,
+  iterationId: string,
+  outputKeys: { left: string; right: string; front: string }
+): Promise<void> => {
+  try {
+    await db.sequelize.transaction(async (t) => {
+      const doctorIdNum = typeof doctorId === 'string' ? parseInt(doctorId.replace(/\D/g, ""), 10) : doctorId;
+      const patientIdNum = typeof patientId === 'string' ? parseInt(patientId, 10) : patientId;
+
+      const existingPatient = await db.Patient.findOne({
+        where: { id: patientIdNum },
+        transaction: t,
+      });
+
+      if (!existingPatient) {
+        throw new ApiError(status.NOT_FOUND, "Patient not found");
+      }
+
+      const sides = ["left", "right", "front"] as const;
+      
+      const imageCreationPromises = sides.map((side) => {
+        return db.PatientOutputImage.create(
+          {
+            patient_id: patientIdNum,
+            doctor_id: doctorIdNum,
+            bucket_key: outputKeys[side],
+            iteration_code: iterationId,
+            direction: "out",
+            view_position: side,
+          },
+          { transaction: t }
+        );
+      });
+
+      await Promise.all(imageCreationPromises);
+    });
+  } catch (err: any) {
+    console.error("saveOutputImageKeysToDB error", err);
+  }
+};
+
+export const generateSignedUrls = async (
+  bucketName: string,
+  outputKeys: { left: string; right: string; front: string }
+) => {
+  try {
+    const urls: Record<string, string> = {};
+
+    for (const [side, key] of Object.entries(outputKeys)) {
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+      });
+      // 1 hour
+      urls[side] = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    }
+
+    return urls;
+  } catch (error) {
+    console.error("Failed to generate signed URLs", error);
+    throw new Error("Could not generate signed URLs");
   }
 };

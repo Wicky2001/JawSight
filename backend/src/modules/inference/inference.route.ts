@@ -6,8 +6,6 @@ const router = Router();
 
 router.post("/sns-webhook", snsWebhookController);
 
-
-
 // Image upload route
 router.route("/").post(auth,uploadInferenceImages.fields([
     { name: "leftImage", maxCount: 1 },

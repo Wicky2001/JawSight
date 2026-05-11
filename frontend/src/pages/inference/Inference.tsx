@@ -6,7 +6,8 @@ import { InfoCallout } from '../../helpers/ui/InfoCallout';
 import { Toast } from '../../helpers/ui/Toast';
 import { UploadZone } from './UploadZone';
 import { LandmarkModal } from './LandmarkModal';
-
+import { useSocket } from '../../context/SocketContext'; // Assuming you have a hook
+import { useEffect } from 'react';
 export const InferenceComponent: React.FC = () => {
   const [images, setImages] = useState<{ left: string | null; right: string | null; front: string | null }>({ left: null, right: null, front: null });
   const [csvData, setCsvData] = useState<string | null>(null);
@@ -15,6 +16,22 @@ export const InferenceComponent: React.FC = () => {
   const [toastMsg, setToastMsg] = useState('');
   const [showLandmarkModal, setShowLandmarkModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { latestPrediction, clearPrediction } = useSocket();
+
+  useEffect(() => {
+    if (latestPrediction) {
+      // Something was completed!
+      setIsSubmitting(false);
+
+      if (latestPrediction.status === 'success') {
+        const { urls } = latestPrediction;
+        setImages({ left: urls.left, right: urls.right, front: urls.front });
+      }
+
+      clearPrediction();
+    }
+  }, [latestPrediction]);
 
   const handleUpload = (id: 'left' | 'right' | 'front', dataUrl: string) => {
     setImages(prev => ({ ...prev, [id]: dataUrl }));
@@ -63,8 +80,7 @@ export const InferenceComponent: React.FC = () => {
     } catch (error: any) {
       console.error("Submission failed:", error);
       setToastMsg(error.response?.data?.message || "Failed to submit data. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Only stop loading on error. If success, wait for socket event!
     }
   };
 

@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import httpStatus from "http-status";
 import { doctorSocketMap } from "../../helpers/socket.helper.js";
-import { pushToSqsQueue, uploadImagesToS3, saveInputImageKeysToDB } from "./inference.service.js";
+import { pushToSqsQueue, uploadImagesToS3, saveInputImageKeysToDB, saveOutputImageKeysToDB, generateSignedUrls } from "./inference.service.js";
 import ApiError from "../../helpers/ApiError.js";
 import { catchAsync } from "../../helpers/error.handlers.js";
 import {v4 as uuidv4} from "uuid";
 import { UploadedDataObject } from "./types.js";
+import { ta } from "zod/locales";
 
 
 export const snsWebhookController = async (req: Request, res: Response) => {
@@ -40,24 +41,45 @@ export const snsWebhookController = async (req: Request, res: Response) => {
     if (snsMessageType === 'Notification') {
       console.log("Received Real SNS Notification!");
       
-      // The payload you sent from Lambda is stringified inside the 'Message' property
       const response = JSON.parse(body.Message); 
-      console.log("Parsed SNS Message:", response);
+      const snsStatus = response.status;
+      const data = response.data || {};
       
-      const { doctor_id, patient_id, imageUrl, iterationId } = response.data;
+      const { doctor_id, patient_id, iterationId, bucket_name, output_images_keys } = data;
 
       const io = req.app.get("socketio");
       const targetSocketId = doctorSocketMap.get(doctor_id);
 
-      if (targetSocketId) {
-        io.to(targetSocketId).emit("prediction_complete", {
-          patient_id,
-          imageUrl,
-          iterationId
-        });
-        console.log(`Pushed real AWS result to socket ${targetSocketId}`);
+      if(!targetSocketId) {
+        console.log(`❌ Doctor ${doctor_id} is not connected. Cannot send SNS update to client.`);
+      }
+
+      
+
+      if (snsStatus === "success" && output_images_keys) {
+        // 1. Write the result bucket keys to patient-output-images table
+        await saveOutputImageKeysToDB(doctor_id, patient_id, iterationId, output_images_keys);
+
+        // 2. Create publicly visible signed URLs (1 hour)
+        const signedUrls = await generateSignedUrls(bucket_name, output_images_keys);
+
+        // Emit success to frontend
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("prediction_complete", {
+            status: "success",
+            patient_id,
+            iterationId,
+            urls: signedUrls,
+          });
+        } 
       } else {
-        console.log(`Doctor ${doctor_id} is not connected.`);
+        
+        if (targetSocketId) {
+          io.to(targetSocketId).emit("prediction_complete", {
+            status: "error",
+            message: response.message || "An unknown error occurred during inference",
+          });
+        }
       }
 
       return res.status(200).send("Message Processed");
