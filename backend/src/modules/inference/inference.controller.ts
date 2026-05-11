@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import httpStatus from "http-status";
 import { doctorSocketMap } from "../../helpers/socket.helper.js";
-import { pushToSqsQueue } from "./inference.service.js";
+import { pushToSqsQueue, uploadImagesToS3, saveInputImageKeysToDB } from "./inference.service.js";
 import ApiError from "../../helpers/ApiError.js";
 import { catchAsync } from "../../helpers/error.handlers.js";
+import {v4 as uuidv4} from "uuid";
+import { UploadedDataObject } from "./types.js";
 
 
-
-
-export const handleRealSnsWebhook = async (req: Request, res: Response) => {
+export const snsWebhookController = async (req: Request, res: Response) => {
   try {
     const snsMessageType = req.headers['x-amz-sns-message-type'];
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -72,38 +72,42 @@ export const handleRealSnsWebhook = async (req: Request, res: Response) => {
 };
 
 export const uploadImagesController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // 1. Extract data from the request body
-    // (Assuming you are passing doctorId and patientId from the frontend)
     const { patient_id } = req.body;
     
-    // Generate a unique ID for this specific prediction run
-    const iterationId = `iter_${Date.now()}`; 
+    const iterationId = `iter_${uuidv4()}`; 
 
-    // 2. Handle Image Upload to S3 here
-    // In a real scenario, you would upload req.files to S3 and get the URLs back.
-    // For now, we will mock the S3 URLs:
-    const s3Urls = [
-      "https://your-bucket.s3.amazonaws.com/mock-image-1.jpg",
-      "https://your-bucket.s3.amazonaws.com/mock-image-2.jpg"
-    ];
+
+     const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    const leftImage = files.leftImage?.[0];
+    const rightImage = files.rightImage?.[0];
+    const frontImage = files.frontImage?.[0];
+    const frontCsv = files.frontCsv?.[0];
+
+    if (!leftImage || !rightImage || !frontImage || !frontCsv) {
+      return next(new ApiError(httpStatus.BAD_REQUEST, "All images and CSV file are required"));
+    }
+
+
+    //Upload images to S3 and get their URLs
+
+    const uploadedData: UploadedDataObject = await uploadImagesToS3(files, patient_id, iterationId,req.user?.id!);
+    
+    // save bucket keys to DB
+    await saveInputImageKeysToDB(uploadedData);
 
     // 3. Push the message to SQS
-    const response = await pushToSqsQueue(req.user?.id!, patient_id, s3Urls, iterationId);
-
-    // 4. Return an immediate 202 Accepted response to the frontend
-    // This tells the React app to start the loading spinner!
+    await pushToSqsQueue(uploadedData);
+  
     res.status(httpStatus.ACCEPTED).json({
       status: "success",
       message: "Images successfully uploaded and queued for ML processing.",
       data: {
-        iterationId,
+        iterationId : iterationId,
         status: "PROCESSING"
       }
     });
 
-  } catch (error) {
-    // Pass the error to your global error handler middleware
-    next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to queue prediction task"));
-  }
-});
+  } );

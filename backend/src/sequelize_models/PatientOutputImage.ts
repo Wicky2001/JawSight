@@ -1,10 +1,10 @@
 import { Model, DataTypes, Sequelize } from 'sequelize';
 
-export class PatientImage extends Model {
+export class PatientOutputImage extends Model {
   declare id: number;
   declare patient_id: number;
   declare doctor_id: number;
-  declare image_url: string;
+  declare bucket_key: string;
   declare iteration_code: string;
   declare direction: 'IN' | 'OUT';
   declare view_position: 'FRONT' | 'LEFT' | 'RIGHT';
@@ -13,7 +13,7 @@ export class PatientImage extends Model {
   declare readonly deletedAt: Date;
 
   static initModel(sequelize: Sequelize) {
-    PatientImage.init(
+    PatientOutputImage.init(
       {
         id: {
           type: DataTypes.BIGINT,
@@ -28,7 +28,7 @@ export class PatientImage extends Model {
           type: DataTypes.BIGINT,
           allowNull: false,
         },
-        image_url: {
+        bucket_key: {
           type: DataTypes.TEXT,
           allowNull: false,
         },
@@ -44,7 +44,7 @@ export class PatientImage extends Model {
       },
       {
         sequelize,
-        tableName: 'patient_images',
+        tableName: 'patients_output_images',
         paranoid: true,
         timestamps: true,
       }
@@ -52,7 +52,7 @@ export class PatientImage extends Model {
   }
 
   static associate(models: any) {
-    PatientImage.belongsTo(models.Patient, { foreignKey: 'patient_id', as: 'patient' });
-    PatientImage.belongsTo(models.Doctor, { foreignKey: 'doctor_id', as: 'doctor' });
+    PatientOutputImage.belongsTo(models.Patient, { foreignKey: 'patient_id', as: 'patient' });
+    PatientOutputImage.belongsTo(models.Doctor, { foreignKey: 'doctor_id', as: 'doctor' });
   }
 }

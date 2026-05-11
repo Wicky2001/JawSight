@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { handleRealSnsWebhook, uploadImagesController } from "./inference.controller.js";
+import { snsWebhookController, uploadImagesController } from "./inference.controller.js";
 import { uploadInferenceImages } from "../../helpers/multer.js";
 import { auth } from "../../helpers/auth/access.js";
 const router = Router();
 
-router.post("/sns-webhook", handleRealSnsWebhook);
+router.post("/sns-webhook", snsWebhookController);
 
 
 

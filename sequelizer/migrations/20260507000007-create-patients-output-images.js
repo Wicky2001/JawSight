@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('patient_images', {
+    await queryInterface.createTable('patients_output_images', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -30,7 +30,7 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
-      image_url: {
+      bucket_key: {
         type: Sequelize.TEXT,
         allowNull: false
       },
@@ -58,8 +58,8 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('patient_images');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_patient_images_direction";');
-    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_patient_images_view_position";');
+    await queryInterface.dropTable('patients_output_images');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_patients_output_images_direction";');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_patients_output_images_view_position";');
   }
 };

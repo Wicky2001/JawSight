@@ -1,4 +1,3 @@
-import { de } from "zod/locales";
 import db from "../../sequelize_models/index.js";
 
 import { GoogleProfile } from "./auth.types.js";
