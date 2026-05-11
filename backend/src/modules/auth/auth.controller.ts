@@ -42,28 +42,16 @@ export const googleCallbackController = catchAsync(
 
 export const meController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate(
-      "access-jwt",
-      { session: false },
-      async (err: any, jwtPayload: any) => {
-        if (err || !jwtPayload || jwtPayload.id === undefined) {
-          
-          return res.status(401).json({
-            message: "Unauthorized. Please login.",
-          });
-        }
-
+   
 
         return res.status(200).json({
           success: true,
           message: "Authenticated successfully",
-          user: {
-            id: jwtPayload.id,
-          },
+          user: req.user,
         
         });
-      },
-    )(req, res, next);
+      
+  
   },
 );
 

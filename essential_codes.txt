@@ -471,3 +471,41 @@ psql -U app_user -d postgres   - login using local socket connection
 psql -h localhost -p 5432 -U app_user -d postgres - login with password
 \list - list all available dbs
 \c db_name - swicth to another db
+
+
+
+File upload sorage flow
+
+SSD
+ ↓
+SSD internal cache
+ ↓
+Kernel page cache
+ ↓
+Browser buffer
+ ↓
+Kernel socket buffer
+ ↓
+NIC DMA/ring buffer
+ ↓
+NIC onboard memory
+ ↓
+Ethernet/WiFi
+
+
+Multer work flow
+Browser upload
+   ↓
+Express route matched
+   ↓
+Multer middleware
+   ↓
+Busboy streaming parser
+   ↓
+File saved
+   ↓
+req.file created
+   ↓
+next()
+   ↓
+Your controller

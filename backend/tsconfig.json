@@ -6,6 +6,7 @@
     "paths": {
       "@shared/*": ["../shared/src/*"] /* The bridge to your shared research schemas */
     },
+    "typeRoots": ["./node_modules/@types", "./src/helpers/types"],
     "outDir": "./dist",                /* Where the compiled code goes */
     "rootDir": "./src",
     "strict": true,                    /* Critical for research accuracy */

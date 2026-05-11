@@ -7,7 +7,7 @@ const sqsClient = new SQSClient({
     
 });
 
-export const pushToSqsQueue = async (doctorId: string, patientId: string, s3Urls: string[], iterationId: string) => {
+export const pushToSqsQueue = async (doctorId: number, patientId: string, s3Urls: string[], iterationId: string) => {
   const queueUrl = process.env.SQS_QUEUE_URL; // Make sure this is in your .env file!
 
   if (!queueUrl) {
@@ -24,7 +24,6 @@ export const pushToSqsQueue = async (doctorId: string, patientId: string, s3Urls
 
   const command = new SendMessageCommand({
     QueueUrl: queueUrl,
-    MessageGroupId:doctorId,
     MessageDeduplicationId: `${doctorId}-${iterationId}`,
     MessageBody: JSON.stringify(messageBody),
   });

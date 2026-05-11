@@ -5,7 +5,7 @@ interface UploadZoneProps {
   id: 'left' | 'right' | 'front';
   title: string;
   subtitle: string;
-  image: string | null;
+  imageDataUrl: string | null;
   bgImage?: string;
   hasCsv?: boolean;
   onUpload: (id: 'left' | 'right' | 'front', dataUrl: string) => void;
@@ -14,7 +14,7 @@ interface UploadZoneProps {
   onEditMarks?: () => void;
 }
 
-export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, image, bgImage, hasCsv, onUpload, onRemove, onError, onEditMarks }) => {
+export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, imageDataUrl, bgImage, hasCsv, onUpload, onRemove, onError, onEditMarks }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +37,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, ima
     <div className="flex flex-col gap-2 h-full">
       <div className="flex justify-between items-end">
         <span className="font-medium text-slate-700">{title}</span>
-        {image && (
+        {imageDataUrl && (
           <span className={`text-xs font-semibold flex items-center gap-1 ${id === 'front' && !hasCsv ? 'text-amber-600' : 'text-emerald-600'}`}>
             {id === 'front' && !hasCsv ? <AlertCircle className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />} 
             {id === 'front' && !hasCsv ? 'Pending Marks' : 'Uploaded'}
@@ -46,9 +46,9 @@ export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, ima
       </div>
       
       <div 
-        onClick={() => !image && fileInputRef.current?.click()}
+        onClick={() => !imageDataUrl && fileInputRef.current?.click()}
         className={`relative flex-1 rounded-2xl transition-all duration-200 overflow-hidden min-h-[280px] flex flex-col items-center justify-center
-          ${image 
+          ${imageDataUrl 
             ? 'border-2 border-slate-200 shadow-sm bg-slate-900' 
             : 'border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-teal-400 cursor-pointer group'
           }`}
@@ -61,7 +61,7 @@ export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, ima
           className="hidden" 
         />
 
-        {!image && bgImage && (
+        {!imageDataUrl && bgImage && (
           <div 
             className="absolute inset-0 z-0 opacity-40 group-hover:opacity-50 transition-opacity"
             style={{
@@ -72,9 +72,9 @@ export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, ima
           />
         )}
 
-        {image ? (
+        {imageDataUrl ? (
           <>
-            <img src={image} alt={title} className="w-full h-full object-contain relative z-10" />
+            <img src={imageDataUrl} alt={title} className="w-full h-full object-contain relative z-10" />
             
             {/* Top Right Controls */}
             <div className="absolute top-3 right-3 flex gap-2 z-20">

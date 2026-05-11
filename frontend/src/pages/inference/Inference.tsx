@@ -46,19 +46,16 @@ export const InferenceComponent: React.FC = () => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-
-      formData.append('leftImage', dataURLtoFile(images.left as string, 'left_profile.jpg'));
-      formData.append('rightImage', dataURLtoFile(images.right as string, 'right_profile.jpg'));
-      formData.append('frontImage', dataURLtoFile(images.front as string, 'front_profile.jpg'));
+      //TODO - need to update with actual patient ID logic
+      formData.append('patientId', `patient_${Date.now()}`); 
+      formData.append('leftImage', dataURLtoFile(images.left as string, 'left'));
+      formData.append('rightImage', dataURLtoFile(images.right as string, 'right'));
+      formData.append('frontImage', dataURLtoFile(images.front as string, 'front'));
       
-      const csvBlob = new Blob([csvData as string], { type: 'text/csv' });
+      const csvBlob = new Blob([csvData as string], { type: 'tet/csv' });
       formData.append('frontCsv', csvBlob, 'front.csv');
 
-      const response = await api.post('/inference', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const response = await api.post('/inference', formData);
 
       console.log("Server Response:", response.data);
       setToastMsg("Inference data successfully submitted!");
@@ -105,7 +102,7 @@ export const InferenceComponent: React.FC = () => {
                   id="left" 
                   title="Left Profile" 
                   subtitle="90° lateral view"
-                  image={images.left} 
+                  imageDataUrl={images.left} 
                   bgImage="/leftUploadPlaceHolder.png"
                   onUpload={handleUpload} 
                   onRemove={handleRemove} 
@@ -115,7 +112,7 @@ export const InferenceComponent: React.FC = () => {
                   id="right" 
                   title="Right Profile" 
                   subtitle="90° lateral view"
-                  image={images.right} 
+                  imageDataUrl={images.right} 
                   bgImage="/rightUploadPlaceHolder.png"
                   onUpload={handleUpload} 
                   onRemove={handleRemove}
@@ -146,7 +143,7 @@ export const InferenceComponent: React.FC = () => {
                   id="front" 
                   title="Front Face" 
                   subtitle="Directly facing camera. No tilt."
-                  image={images.front} 
+                  imageDataUrl={images.front} 
                   bgImage="/frontUploadPlaceHolder.png"
                   hasCsv={!!csvData}
                   onUpload={handleUpload} 

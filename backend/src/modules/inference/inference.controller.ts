@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import httpStatus from "http-status";
 import { doctorSocketMap } from "../../helpers/socket.helper.js";
-import { pushToSqsQueue } from "./predictions.service.js";
+import { pushToSqsQueue } from "./inference.service.js";
 import ApiError from "../../helpers/ApiError.js";
-
+import { catchAsync } from "../../helpers/error.handlers.js";
 
 
 
@@ -71,11 +71,11 @@ export const handleRealSnsWebhook = async (req: Request, res: Response) => {
   }
 };
 
-export const uploadImagesAndQueue = async (req: Request, res: Response, next: NextFunction) => {
+export const uploadImagesController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   try {
     // 1. Extract data from the request body
     // (Assuming you are passing doctorId and patientId from the frontend)
-    const { doctor_id, patient_id } = req.body;
+    const { patient_id } = req.body;
     
     // Generate a unique ID for this specific prediction run
     const iterationId = `iter_${Date.now()}`; 
@@ -89,7 +89,7 @@ export const uploadImagesAndQueue = async (req: Request, res: Response, next: Ne
     ];
 
     // 3. Push the message to SQS
-    const response = await pushToSqsQueue(doctor_id, patient_id, s3Urls, iterationId);
+    const response = await pushToSqsQueue(req.user?.id!, patient_id, s3Urls, iterationId);
 
     // 4. Return an immediate 202 Accepted response to the frontend
     // This tells the React app to start the loading spinner!
@@ -106,4 +106,4 @@ export const uploadImagesAndQueue = async (req: Request, res: Response, next: Ne
     // Pass the error to your global error handler middleware
     next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to queue prediction task"));
   }
-};
+});

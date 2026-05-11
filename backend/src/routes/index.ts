@@ -1,5 +1,5 @@
 import { Router } from "express";
-import predictionsRouter from "../modules/predictions/predictions.route.js";
+import predictionsRouter from "../modules/inference/inference.route.js";
 import authRouter from "../modules/auth/auth.route.js";
 
 const router = Router();

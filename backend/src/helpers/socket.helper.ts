@@ -1,7 +1,6 @@
 import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
 import { verifyAccessToken } from "./auth/access.js";
-import cookie from "cookie";
 import ApiError from "./ApiError.js";
 import { status } from "http-status";
 export const doctorSocketMap = new Map<string, string>();
@@ -36,7 +35,7 @@ export function initializeSocket(httpServer: HttpServer) {
       return next(new ApiError(status.UNAUTHORIZED, "Authentication error: No cookies found"));
     }
 
-    const cookies = cookie.parseCookie(rawCookie);
+    const cookies = parseCookies(rawCookie);
 
     const accessToken = cookies['access-token'];
 
