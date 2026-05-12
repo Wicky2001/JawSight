@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Edit3 } from 'lucide-react';
 
 interface UploadZoneProps {
@@ -16,20 +16,49 @@ interface UploadZoneProps {
 
 export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, imageDataUrl, bgImage, hasCsv, onUpload, onRemove, onError, onEditMarks }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const processFile = (file: File) => {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+      onError('Invalid file type. Please upload a .jpg, .jpeg, or .png file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      onUpload(id, reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-      if (!validTypes.includes(file.type)) {
-        onError('Invalid file type. Please upload a .jpg, .jpeg, or .png file.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onUpload(id, reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      processFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!imageDataUrl) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (imageDataUrl) return;
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
     }
   };
 
@@ -47,10 +76,13 @@ export const UploadZone: React.FC<UploadZoneProps> = ({ id, title, subtitle, ima
       
       <div 
         onClick={() => !imageDataUrl && fileInputRef.current?.click()}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={`relative flex-1 rounded-2xl transition-all duration-200 overflow-hidden min-h-[280px] flex flex-col items-center justify-center
           ${imageDataUrl 
             ? 'border-2 border-slate-200 shadow-sm bg-slate-900' 
-            : 'border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-teal-400 cursor-pointer group'
+            : `border-2 border-dashed ${isDragging ? 'border-teal-400 bg-teal-50' : 'border-slate-300 bg-slate-50'} hover:bg-slate-100 hover:border-teal-400 cursor-pointer group`
           }`}
       >
         <input 

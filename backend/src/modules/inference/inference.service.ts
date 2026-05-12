@@ -20,7 +20,6 @@ export const pushToSqsQueue = async (messageBody: UploadedDataObject) => {
 
   const command = new SendMessageCommand({
     QueueUrl: queueUrl,
-    MessageDeduplicationId: `${messageBody.doctor_id}-${messageBody.patient_id}-${messageBody.iterationId}`,
     MessageBody: JSON.stringify(messageBody),
   });
 
@@ -146,6 +145,8 @@ export const saveInputImageKeysToDB = async (
       const doctorIdNum = uploadedData.doctor_id;
       const patientIdNum = uploadedData.patient_id;
 
+      console.log("Saving input image keys to DB for doctorId:", doctorIdNum, "patientId:", patientIdNum, "iterationId:", uploadedData.iterationId);
+
       // Verify the patient actually exists first
       const existingPatient = await db.Patient.findOne({
         where: {
@@ -209,25 +210,32 @@ export const saveOutputImageKeysToDB = async (
       }
 
       const sides = ["left", "right", "front"] as const;
-      
-      const imageCreationPromises = sides.map((side) => {
-        return db.PatientOutputImage.create(
-          {
+
+      const inputImageList = sides.map((side)=>{
+         return {
             patient_id: patientIdNum,
             doctor_id: doctorIdNum,
             bucket_key: outputKeys[side],
             iteration_code: iterationId,
             direction: "out",
             view_position: side,
-          },
+          }
+      });
+      
+     
+        await db.PatientOutputImage.bulkCreate(
+          inputImageList,
           { transaction: t }
         );
-      });
+      
 
-      await Promise.all(imageCreationPromises);
     });
   } catch (err: any) {
     console.error("saveOutputImageKeysToDB error", err);
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      `Database error: ${err.message || "Unknown database error"}`
+    );
   }
 };
 

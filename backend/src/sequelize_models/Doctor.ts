@@ -34,7 +34,8 @@ export class Doctor extends Model {
 
   static associate(models: any) {
     Doctor.hasMany(models.Patient, { foreignKey: 'doctor_id', as: 'patients' });
-    Doctor.hasMany(models.PatientImage, { foreignKey: 'doctor_id', as: 'patient_images' });
+    Doctor.hasMany(models.PatientInputImage, { foreignKey: 'doctor_id', as: 'patient_input_images' });
+    Doctor.hasMany(models.PatientOutputImage, { foreignKey: 'doctor_id', as: 'patient_output_images' });
     Doctor.hasMany(models.RefreshToken, { foreignKey: 'doctor_id', as: 'refresh_tokens' });
     Doctor.hasMany(models.AuditLog, { foreignKey: 'doctor_id', as: 'audit_logs' });
   }

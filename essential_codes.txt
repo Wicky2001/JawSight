@@ -25,13 +25,15 @@ aws s3 ls --profile JAW_SIGHT_DEV
 
 Step 2 — Run your Docker container with mounted credentials
 
+
+bind mount bind my local aws profiles to dcoker container
+-v $env:USERPROFILE\.aws:/root/.aws
 docker run -it `
   -p 9000:8080 `
   -v $env:USERPROFILE\.aws:/root/.aws `
-  -e AWS_PROFILE=JAW_SIGHT_DEV `
-  -e AWS_REGION=us-east-1 `
-  -e BUCKET_NAME=result-images-915658834610-us-east-1-an `
-  -e SNS_TOPIC_ARN=arn:aws:sns:us-east-1:915658834610:model_process_status `
+  -e AWS_REGION=ap-south-1 `
+  -e BUCKET_NAME=jawsight-image-processor-dev-data `
+  -e SNS_TOPIC_ARN=arn:aws:sqs:ap-south-1:915658834610:jawsight-image-processor-image-processing-queue `
   -e ENVIRONMENT=development `
   jawsight/lambda-image-processing
 
@@ -45,6 +47,25 @@ curl http://localhost:9000/2015-03-31/functions/function/invocations `
   -ContentType "application/json"
 
 
+
+---- aws credentail chain ------
+
+Common credential chain order
+
+Node.js AWS SDK v3 typically checks:
+
+Environment variables
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+ --------------
+AWS profile files
+~/.aws/credentials
+~/.aws/config
+ --------------
+IAM Identity Center (SSO)
+ECS container credentials
+EC2 instance metadata
+Lambda execution role
 
 ---Lambda reports---
 
@@ -507,3 +528,29 @@ req.file created
 next()
    ↓
 Your controller
+
+
+
+
+
+
+SNS UPLOADED MESSAGE =  {
+  doctor_id: '1',
+  patient_id: '1',
+  iterationId: 'iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8',
+  input_image_details: [
+    {
+      side: 'left',
+      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/left.png'
+    },
+    {
+      side: 'right',
+      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/right.png'
+    },
+    {
+      side: 'front',
+      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/front.png',
+      csv_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/front.csv'
+    }
+  ]
+}

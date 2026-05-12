@@ -64,12 +64,12 @@ export const InferenceComponent: React.FC = () => {
     try {
       const formData = new FormData();
       //TODO - need to update with actual patient ID logic
-      formData.append('patientId', `patient_${Date.now()}`); 
+      formData.append('patientId', '1'); 
       formData.append('leftImage', dataURLtoFile(images.left as string, 'left'));
       formData.append('rightImage', dataURLtoFile(images.right as string, 'right'));
       formData.append('frontImage', dataURLtoFile(images.front as string, 'front'));
       
-      const csvBlob = new Blob([csvData as string], { type: 'tet/csv' });
+      const csvBlob = new Blob([csvData as string], { type: 'text/csv' });
       formData.append('frontCsv', csvBlob, 'front.csv');
 
       const response = await api.post('/inference', formData);

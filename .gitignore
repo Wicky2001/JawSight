@@ -107,3 +107,4 @@ app_copy.py
 local_testing.py
 
 u2net_human_seg.onnx
+sample_input_images/

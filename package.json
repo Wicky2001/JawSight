@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "dev:backend": "npm run dev --workspace=backend",
+    "debug:backend": "npm run dev:debug --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "build": "echo 'Build all packages'",
     "test": "echo 'Run tests'"

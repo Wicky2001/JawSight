@@ -6,6 +6,7 @@ import ApiError from "../../helpers/ApiError.js";
 import { catchAsync } from "../../helpers/error.handlers.js";
 import {v4 as uuidv4} from "uuid";
 import { UploadedDataObject } from "./types.js";
+import { de } from "zod/locales";
 
 
 
@@ -94,10 +95,15 @@ export const snsWebhookController = async (req: Request, res: Response) => {
 };
 
 export const uploadImagesController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { patient_id } = req.body;
+    const patientId  = req.body?.patientId;
+    if(!patientId) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "patientId is required in the request body");
+    }
+    debugger;
+
     
     const iterationId = `iter_${uuidv4()}`; 
-
+    
 
      const files = req.files as {
       [fieldname: string]: Express.Multer.File[];
@@ -109,17 +115,18 @@ export const uploadImagesController = catchAsync(async (req: Request, res: Respo
     const frontCsv = files.frontCsv?.[0];
 
     if (!leftImage || !rightImage || !frontImage || !frontCsv) {
-      return next(new ApiError(httpStatus.BAD_REQUEST, "All images and CSV file are required"));
+      throw new ApiError(httpStatus.BAD_REQUEST, "All images and CSV file are required");
     }
 
 
     //Upload images to S3 and get their URLs
 
-    const uploadedData: UploadedDataObject = await uploadImagesToS3(files, patient_id, iterationId,req.user?.id!);
+    const uploadedData: UploadedDataObject = await uploadImagesToS3(files, patientId, iterationId,req.user?.id!);
     
     // save bucket keys to DB
     await saveInputImageKeysToDB(uploadedData);
 
+    console.log("SNS UPLOADED MESSAGE = ", uploadedData);
     // 3. Push the message to SQS
     await pushToSqsQueue(uploadedData);
   

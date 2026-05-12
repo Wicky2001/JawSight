@@ -8,11 +8,12 @@ export const uploadInferenceImages = multer({
         fileSize: 50 * 1024 * 1024, // Limit file size to 50MB
     },
     fileFilter: (req:Request, file, cb) => {
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png','text/csv'];
+        console.log("FILE  = ", file);
         if (allowedTypes.includes(file.mimetype)) {
             cb(null, true);
         } else {
-            cb(new ApiError(400, 'Invalid file type. Only .jpg, .jpeg, and .png are allowed.'));
+            cb(new ApiError(400, 'Invalid file type. Only .jpg, .jpeg, .png, and .csv are allowed.'));
         }
     },
 })

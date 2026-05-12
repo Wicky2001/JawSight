@@ -1,7 +1,6 @@
 // --- Helper: Convert Base64 Data URL to File Blob ---
 export const dataURLtoFile = (dataurl: string, filename: string): File => {
 
-  debugger;
   const arr = dataurl.split(',');
   const mimeMatch = arr[0].match(/:(.*?);/);
   const mime = mimeMatch ? mimeMatch[1] : '';
