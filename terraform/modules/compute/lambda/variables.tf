@@ -22,6 +22,12 @@ variable "ecr_repository_url" {
   default     = ""
 }
 
+variable "sqs_visibility_timeout" {
+  description = "sqs message visibility timeout"
+  type = number
+  default = 960
+}
+
 variable "timeout" {
   description = "Lambda timeout in seconds"
   type        = number

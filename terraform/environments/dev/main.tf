@@ -27,6 +27,7 @@ module "sqs" {
   source       = "../../modules/messaging/sqs"
   project_name = var.project_name
   environment  = var.environment
+  sqs_visibility_timeout = var.sqs_visibility_timeout
 }
 
 module "sns" {

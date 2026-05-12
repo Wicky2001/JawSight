@@ -9,3 +9,10 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+//visibility timeout for SQS messages, should be greater than Lambda timeout to prevent premature retries
+variable "sqs_visibility_timeout" {
+  description = "sqs message visibility timeout"
+  type = number
+  default = 960
+}

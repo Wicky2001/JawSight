@@ -13,12 +13,12 @@ resource "aws_sqs_queue" "image_processing_dlq" {
   sqs_managed_sse_enabled = true
 }
 
+
 # Main image processing queue
 resource "aws_sqs_queue" "image_processing_queue" {
   name = "${var.project_name}-image-processing-queue"
-  
   # Queue configuration matching your current settings
-  visibility_timeout_seconds = 300      # 5 minutes
+  visibility_timeout_seconds = var.sqs_visibility_timeout # must be greater than Lambda timeout to prevent premature retries
   message_retention_seconds  = 3600     # 1 hour
   max_message_size          = 1048576   # 1 kb
   delay_seconds             = 0         # No delivery delay

@@ -4,6 +4,10 @@ from models.exceptions import S3BucketError, UnsuitableImageError
 from services.s3_service import has_at_least_n_objects, save_image_to_s3_bucket
 from services.sns_service import push_to_sns
 from services.image_service import process_images
+from aws_xray_sdk.core import xray_recorder, patch_all
+
+patch_all()
+
 
 def lambda_handler(event, context):
     """
@@ -13,6 +17,12 @@ def lambda_handler(event, context):
     - idempotency
     - error isolation
     """
+    
+    
+    xray_recorder.put_annotation("project", "jawsight-lambda-image-processor")
+    
+    
+    
     logger.info("✅ SUCCESS: lambda_handler started with %d records", len(event.get('Records', [])))
 
     failures = []

@@ -22,14 +22,10 @@ resource "aws_lambda_function" "processor" {
   
   # Tracing configuration
   tracing_config {
-    mode = "PassThrough"
+    mode = "Active"
   }
   
-  # Recursive loop detection
-  dead_letter_config {
-    target_arn = ""  # Empty means terminate on recursive loops
-  }
-  
+ 
   # Environment variables (expanded from your current setup)
   environment {
     variables = {

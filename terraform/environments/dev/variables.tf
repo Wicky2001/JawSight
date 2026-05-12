@@ -23,6 +23,12 @@ variable "aws_profile" {
   
 }
 
+variable "sqs_visibility_timeout" {
+  description = "sqs message visibility timeout"
+  type = number
+  default = 960
+}
+
 variable "lambda_timeout" {
   description = "Lambda timeout in seconds"
   type        = number
