@@ -3,7 +3,7 @@ from utils.logger import logger, log_exception
 from config.settings import SNS_TOPIC_ARN
 from services.aws_client import sns_client
 
-def push_to_sns(message: str, success: bool, data: dict):
+def push_to_sns(message: str, success: str, data: dict):
     try:
         payload = {
                 "message": message,

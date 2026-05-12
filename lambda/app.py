@@ -1,7 +1,6 @@
 import json
 from utils.logger import logger
 from models.exceptions import S3BucketError, UnsuitableImageError
-from config.settings import BUCKET_NAME
 from services.s3_service import has_at_least_n_objects, save_image_to_s3_bucket
 from services.sns_service import push_to_sns
 from services.image_service import process_images
@@ -55,7 +54,6 @@ def lambda_handler(event, context):
                 "doctor_id": doctor_id,
                 "patient_id": patient_id,
                 "iterationId": iteration_id,
-                "bucket_name": BUCKET_NAME,
                 "output_images_keys":{
                     "left": f"{output_folder_key}left.png",
                     "right": f"{output_folder_key}right.png",
@@ -154,7 +152,7 @@ def lambda_handler(event, context):
                 "iterationId": body.get("iterationId"),
             }
 
-            push_to_sns(sns_status_message, False, sns_message_data)
+            push_to_sns(sns_status_message, 'failed', sns_message_data)
 
             
         except ValueError as ve:
@@ -164,10 +162,11 @@ def lambda_handler(event, context):
                 "doctor_id": body.get("doctor_id"),
                 "patient_id": body.get("patient_id"),
                 "iterationId": body.get("iterationId"),
-               
+                "output_images_keys": None,
             }
             
-            push_to_sns(f"Error occured while processing your request. Please upload images again and try again.{str(ve)}",False,sns_message_data)
+            
+            push_to_sns(f"Error occured while processing your request. Please upload images again and try again.{str(ve)}", 'failed', sns_message_data)
             
         except UnsuitableImageError as uie:
             logger.error(f": Image processing issue for message {message_id}: {str(uie)}")
@@ -176,10 +175,10 @@ def lambda_handler(event, context):
                 "doctor_id": body.get("doctor_id"),
                 "patient_id": body.get("patient_id"),
                 "iterationId": body.get("iterationId"),
-            
+                "output_images_keys": None,
             }
             
-            push_to_sns("Uploaded images corroupted. Please upload the images again and try again.", False, sns_message_data)
+            push_to_sns("Uploaded images corroupted. Please upload the images again and try again.", 'failed', sns_message_data)
         
         except Exception as e:
             logger.error(f"❌ UNEXPECTED ERROR: Failed message {message_id}: {str(e)}")
@@ -191,7 +190,7 @@ def lambda_handler(event, context):
                 "output_images_keys": None,
             }
             
-            push_to_sns("While processing your images, we encountered an error. Failed images will be retried automatically. If you didn't see the result on the result page after 10 minutes, please upload the images again. We apologize for the inconvenience.", False, sns_message_data)
+            push_to_sns("While processing your images, we encountered an error. Failed images will be retried automatically. If you didn't see the result on the result page after 10 minutes, please upload the images again. We apologize for the inconvenience.", 'failed', sns_message_data)
 
             failures.append({
                 "itemIdentifier": message_id

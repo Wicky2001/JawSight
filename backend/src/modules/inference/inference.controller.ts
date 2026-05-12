@@ -45,7 +45,7 @@ export const snsWebhookController = async (req: Request, res: Response) => {
       const snsStatus = response.status;
       const data = response.data || {};
       
-      const { doctor_id, patient_id, iterationId, bucket_name, output_images_keys } = data;
+      const { doctor_id, patient_id, iterationId,output_images_keys } = data;
 
       const io = req.app.get("socketio");
       const targetSocketId = doctorSocketMap.get(doctor_id);
@@ -61,7 +61,7 @@ export const snsWebhookController = async (req: Request, res: Response) => {
         await saveOutputImageKeysToDB(doctor_id, patient_id, iterationId, output_images_keys);
 
         // 2. Create publicly visible signed URLs (1 hour)
-        const signedUrls = await generateSignedUrls(bucket_name, output_images_keys);
+        const signedUrls = await generateSignedUrls(output_images_keys);
 
         // Emit success to frontend
         if (targetSocketId) {

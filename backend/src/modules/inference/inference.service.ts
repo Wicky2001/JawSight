@@ -232,7 +232,6 @@ export const saveOutputImageKeysToDB = async (
 };
 
 export const generateSignedUrls = async (
-  bucketName: string,
   outputKeys: { left: string; right: string; front: string }
 ) => {
   try {
@@ -240,7 +239,7 @@ export const generateSignedUrls = async (
 
     for (const [side, key] of Object.entries(outputKeys)) {
       const command = new GetObjectCommand({
-        Bucket: bucketName,
+        Bucket: process.env.S3_BUCKET!,
         Key: key,
       });
       // 1 hour
