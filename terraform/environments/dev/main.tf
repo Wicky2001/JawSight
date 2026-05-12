@@ -13,7 +13,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
   profile = var.aws_profile
 }
 
@@ -24,9 +24,9 @@ module "s3" {
 }
 
 module "sqs" {
-  source       = "../../modules/messaging/sqs"
-  project_name = var.project_name
-  environment  = var.environment
+  source                 = "../../modules/messaging/sqs"
+  project_name           = var.project_name
+  environment            = var.environment
   sqs_visibility_timeout = var.sqs_visibility_timeout
 }
 
@@ -43,30 +43,29 @@ module "sns_subscription" {
 }
 
 module "ecr" {
-  source       = "../../modules/compute/ecr"
+  source       = "../../modules/storage/ecr"
   project_name = var.project_name
   environment  = var.environment
 }
 
 module "iam" {
-  source                      = "../../modules/iam/roles"
-  project_name                = var.project_name
-  environment                 = var.environment
-  s3_bucket_arn               = module.s3.s3_bucket_arn
-  image_processing_queue_arn  = module.sqs.image_processing_queue_arn
-  ecr_repository_arn          = module.ecr.repository_arn
-  sns_topic_arn               = module.sns.topic_arn
+  source                     = "../../modules/iam/roles"
+  project_name               = var.project_name
+  environment                = var.environment
+  s3_bucket_arn              = module.s3.s3_bucket_arn
+  image_processing_queue_arn = module.sqs.image_processing_queue_arn
+  ecr_repository_arn         = module.ecr.repository_arn
+  sns_topic_arn              = module.sns.topic_arn
 }
 
 module "lambda" {
-  source                      = "../../modules/compute/lambda"
-  project_name                = var.project_name
-  environment                 = var.environment
-  lambda_role_arn             = module.iam.lambda_role_arn
-  ecr_repository_url          = module.ecr.repository_url
-  timeout                     = var.lambda_timeout
-  memory                      = var.lambda_memory
-  s3_bucket_name              = module.s3.s3_bucket_name
-  sns_topic_arn               = module.sns.topic_arn
-  image_processing_queue_arn  = module.sqs.image_processing_queue_arn
+  source                     = "../../modules/compute/lambda"
+  project_name               = var.project_name
+  environment                = var.environment
+  lambda_role_arn            = module.iam.lambda_role_arn
+  timeout                    = var.lambda_timeout
+  memory                     = var.lambda_memory
+  s3_bucket_name             = module.s3.s3_bucket_name
+  sns_topic_arn              = module.sns.topic_arn
+  image_processing_queue_arn = module.sqs.image_processing_queue_arn
 }

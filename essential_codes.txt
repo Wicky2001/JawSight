@@ -145,9 +145,7 @@ terraform/
     └── versions.tf
 
 
-
-
-terraform -chdir=environments/dev init    
+terraform -chdir=terraform/environments/dev init    
 terraform -chdir=terraform/environments/dev init -upgrade
 
 
@@ -467,8 +465,8 @@ undefined
 
 db login commands
 
-psql -U app_user -d postgres   - login using local socket connection
-psql -h localhost -p 5432 -U app_user -d postgres - login with password
+psql -U app_user -d app_db   - login using local socket connection
+psql -h localhost -p 5432 -U app_user -d app_db - login with password
 \list - list all available dbs
 \c db_name - swicth to another db
 

@@ -2,7 +2,7 @@ resource "aws_lambda_function" "processor" {
   function_name = "${var.project_name}-${var.environment}-lambda"
   role          = var.lambda_role_arn
   package_type  = "Image"
-  image_uri     = "${var.ecr_repository_url}:latest"
+  image_uri     = "public.ecr.aws/lambda/nodejs:18" //place holder image, later will update with ci/cd built image from ECR
   timeout       = var.timeout
   memory_size   = var.memory
   

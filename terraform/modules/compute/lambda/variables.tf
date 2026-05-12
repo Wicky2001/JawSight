@@ -16,11 +16,7 @@ variable "lambda_role_arn" {
   default     = ""
 }
 
-variable "ecr_repository_url" {
-  description = "ECR repository URL"
-  type        = string
-  default     = ""
-}
+
 
 variable "sqs_visibility_timeout" {
   description = "sqs message visibility timeout"

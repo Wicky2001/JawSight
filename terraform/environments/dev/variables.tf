@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "Project name"
   type        = string
-  default     = "image-processor"
+  default     = "jawsight-image-processor"
 }
 
 variable "environment" {
@@ -20,13 +20,13 @@ variable "aws_profile" {
   description = "AWS CLI profile to use for deployment"
   type        = string
   default     = "jawsight-dev-terraform"
-  
+
 }
 
 variable "sqs_visibility_timeout" {
   description = "sqs message visibility timeout"
-  type = number
-  default = 960
+  type        = number
+  default     = 960
 }
 
 variable "lambda_timeout" {
