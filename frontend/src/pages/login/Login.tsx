@@ -33,7 +33,7 @@ const Login = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   
-  debugger;
+  
   const from = location.state?.from?.pathname || searchParams.get('from') || "/";
 
   const handleGoogleLogin = () => {

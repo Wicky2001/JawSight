@@ -46,3 +46,9 @@ variable "webhook_url" {
   type        = string
   default     = "https://reluctant-ferocity-monoxide.ngrok-free.dev/api/inference/sns-webhook" # Placeholder
 }
+
+variable "image_uri" {
+  description = "lambda image url"
+  type        = string
+  default     = "915658834610.dkr.ecr.ap-south-1.amazonaws.com/jawsight-image-processor-dev-repo:v2"
+}

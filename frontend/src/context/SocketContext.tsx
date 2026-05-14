@@ -61,9 +61,10 @@ export const SocketProvider = ({ children }: Props) => {
     });
 
     return () => {
+      debugger;
       newSocket.disconnect();
     };
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated]);
 
   const clearPrediction = useCallback(() => {
     setLatestPrediction(null);

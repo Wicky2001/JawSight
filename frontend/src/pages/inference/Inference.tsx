@@ -25,8 +25,9 @@ export const InferenceComponent: React.FC = () => {
       setIsSubmitting(false);
 
       if (latestPrediction.status === 'success') {
-        const { urls } = latestPrediction;
-        setImages({ left: urls.left, right: urls.right, front: urls.front });
+        const { data } = latestPrediction;
+        debugger;
+        setImages({ left: data.left, right: data.right, front: data.front });
       }
 
       clearPrediction();

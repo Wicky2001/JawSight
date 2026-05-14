@@ -68,9 +68,8 @@ export const uploadImagesToS3 = async (
   const leftImage = files.leftImage?.[0];
 
   if (leftImage) {
-    const extension = leftImage.mimetype.split("/")[1];
 
-    const key = `${doctorId}/${patientId}/${iterationId}/input/left.${extension}`;
+    const key = `${doctorId}/${patientId}/${iterationId}/input/left`;
 
     await uploadSingleFile(leftImage, key);
 
@@ -84,9 +83,8 @@ export const uploadImagesToS3 = async (
   const rightImage = files.rightImage?.[0];
 
   if (rightImage) {
-    const extension = rightImage.mimetype.split("/")[1];
 
-    const key = `${doctorId}/${patientId}/${iterationId}/input/right.${extension}`;
+    const key = `${doctorId}/${patientId}/${iterationId}/input/right`;
 
     await uploadSingleFile(rightImage, key);
 
@@ -102,16 +100,15 @@ export const uploadImagesToS3 = async (
   const frontCsv = files.frontCsv?.[0];
 
   if (frontImage) {
-    const extension = frontImage.mimetype.split("/")[1];
 
-    const imageKey = `${doctorId}/${patientId}/${iterationId}/input/front.${extension}`;
+    const imageKey = `${doctorId}/${patientId}/${iterationId}/input/front`;
 
     await uploadSingleFile(frontImage, imageKey);
 
     let csvKey: string | undefined;
 
     if (frontCsv) {
-      csvKey = `${doctorId}/${patientId}/${iterationId}/input/front.csv`;
+      csvKey = `${doctorId}/${patientId}/${iterationId}/input/front-csv`;
 
       await uploadSingleFile(frontCsv, csvKey);
     }

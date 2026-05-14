@@ -2,7 +2,7 @@ resource "aws_lambda_function" "processor" {
   function_name = "${var.project_name}-${var.environment}-lambda"
   role          = var.lambda_role_arn
   package_type  = "Image"
-  image_uri     = "public.ecr.aws/lambda/nodejs:18" //place holder image, later will update with ci/cd built image from ECR
+  image_uri     = var.image_uri //place holder image, later will update with ci/cd built image from ECR
   timeout       = var.timeout
   memory_size   = var.memory
   
@@ -31,7 +31,9 @@ resource "aws_lambda_function" "processor" {
     variables = {
       BUCKET_NAME     = var.s3_bucket_name
       SNS_TOPIC_ARN   = var.sns_topic_arn
-      ENVIRONMENT     = var.environment
+      ENV     = "development"
+     
+
     }
   }
   
@@ -64,7 +66,7 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   function_name    = aws_lambda_function.processor.arn
   
   # Additional SQS event source mapping settings
-  batch_size                         = 10     # Process up to 10 messages at once
+  batch_size                         = 2     # Process up to 2 messages at once
   maximum_batching_window_in_seconds = 5      # Wait up to 5 seconds to collect messages
   
   # Error handling for SQS processing

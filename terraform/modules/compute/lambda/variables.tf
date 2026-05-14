@@ -16,7 +16,11 @@ variable "lambda_role_arn" {
   default     = ""
 }
 
-
+variable "image_uri" {
+  description = "URI of the Lambda container image in ECR"
+  type        = string
+  default     = ""
+}
 
 variable "sqs_visibility_timeout" {
   description = "sqs message visibility timeout"

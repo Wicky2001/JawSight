@@ -4,9 +4,14 @@ from models.exceptions import S3BucketError, UnsuitableImageError
 from services.s3_service import has_at_least_n_objects, save_image_to_s3_bucket
 from services.sns_service import push_to_sns
 from services.image_service import process_images
-from aws_xray_sdk.core import xray_recorder, patch_all
+from aws_xray_sdk.core import patch_all
 
-patch_all()
+
+try:
+    patch_all()
+    logger.info("AWS X-Ray SDK successfully initialized.")
+except Exception as e:
+    logger.error(f"Failed to initialize AWS X-Ray SDK: {str(e)}")    
 
 
 def lambda_handler(event, context):
@@ -17,10 +22,6 @@ def lambda_handler(event, context):
     - idempotency
     - error isolation
     """
-    
-    
-    xray_recorder.put_annotation("project", "jawsight-lambda-image-processor")
-    
     
     
     logger.info("✅ SUCCESS: lambda_handler started with %d records", len(event.get('Records', [])))
@@ -65,9 +66,9 @@ def lambda_handler(event, context):
                 "patient_id": patient_id,
                 "iterationId": iteration_id,
                 "output_images_keys":{
-                    "left": f"{output_folder_key}left.png",
-                    "right": f"{output_folder_key}right.png",
-                    "front": f"{output_folder_key}front.png"
+                    "left": f"{output_folder_key}left",
+                    "right": f"{output_folder_key}right",
+                    "front": f"{output_folder_key}front"
                 },
             }
             

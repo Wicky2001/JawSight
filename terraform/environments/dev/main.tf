@@ -65,6 +65,7 @@ module "lambda" {
   lambda_role_arn            = module.iam.lambda_role_arn
   timeout                    = var.lambda_timeout
   memory                     = var.lambda_memory
+  image_uri                  = var.image_uri
   s3_bucket_name             = module.s3.s3_bucket_name
   sns_topic_arn              = module.sns.topic_arn
   image_processing_queue_arn = module.sqs.image_processing_queue_arn

@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: Props) => {
     return;
   }
     const initAuth = async () => {
-      debugger;
+      
       try {
         
         const res = await api.get("/auth/me");
