@@ -1,13 +1,8 @@
 import os
-from dotenv import load_dotenv
-
-load_dotenv(verbose=True)
-
-ENV = os.getenv("ENVIRONMENT", "development")
 
 BUCKET_NAME = os.getenv("BUCKET_NAME")
 SNS_TOPIC_ARN = os.getenv("SNS_TOPIC_ARN")
-AWS_PROFILE = os.getenv("AWS_PROFILE", "default")
+ENV = os.getenv("ENV", "production")
 
 # =========================================================
 # GLOBAL VISUALIZATION SETTINGS (FRONT FACE)

@@ -1,111 +1,155 @@
 import { Request, Response, NextFunction } from "express";
 import httpStatus from "http-status";
-import { doctorSocketMap } from "../../helpers/socket.helper.js";
-import { pushToSqsQueue, uploadImagesToS3, saveInputImageKeysToDB, saveOutputImageKeysToDB, generateSignedUrls } from "./inference.service.js";
+import {
+  pushToSqsQueue,
+  uploadImagesToS3,
+  saveInputImageKeysToDB,
+  processInferenceResult,
+  emitToDoctor,
+} from "./inference.service.js";
 import ApiError from "../../helpers/ApiError.js";
 import { catchAsync } from "../../helpers/error.handlers.js";
-import {v4 as uuidv4} from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { UploadedDataObject } from "./types.js";
-import { de } from "zod/locales";
+import { validateSnsPayload } from "./validations.js";
+import { confirmSnsSubscription } from "./inference.service.js";
 
+export const snsWebhookController = async (
+  req: Request,
+  res: Response,
+) => {
 
+  const io = req.app.get("socketio");
 
-export const snsWebhookController = async (req: Request, res: Response) => {
   try {
-    const snsMessageType = req.headers['x-amz-sns-message-type'];
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-    if (snsMessageType === 'SubscriptionConfirmation') {
-      console.log("Received SNS Subscription Confirmation!");
+    const snsMessageType = req.headers["x-amz-sns-message-type"];
 
-      const subscribeUrl = body.SubscribeURL;
-      const topicArn = body.TopicArn;
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body;
 
-      if (!subscribeUrl) {
-        console.log("❌ No SubscribeURL found in confirmation message");
-        return res.status(400).json({ error: "no_subscribe_url" });
-      }
+    // =========================
+    // Subscription Confirmation
+    // =========================
+    if (snsMessageType === "SubscriptionConfirmation") {
 
-      const response = await fetch(subscribeUrl);
-     
-        if (!response.ok) {
-            console.log("❌ Failed to confirm SNS subscription", await response.text());    
-            return res.status(500).json({ error: "subscription_confirmation_failed" });
-        }
+      await confirmSnsSubscription(body.SubscribeURL);
 
-      return res.status(200).json({
+      return res.status(httpStatus.OK).json({
         status: "subscription_confirmed",
-        topic_arn: topicArn,
+        topic_arn: body.TopicArn,
       });
-    } 
-    
-    if (snsMessageType === 'Notification') {
-      console.log("Received Real SNS Notification!");
-      
-      const response = JSON.parse(body.Message); 
-      const snsStatus = response.status;
-      const data = response.data || {};
-      
-      const { doctor_id, patient_id, iterationId,output_images_keys } = data;
-
-      const io = req.app.get("socketio");
-      const targetSocketId = doctorSocketMap.get(doctor_id);
-
-      if(!targetSocketId) {
-        console.log(`❌ Doctor ${doctor_id} is not connected. Cannot send SNS update to client.`);
-      }
-
-      
-
-      if (snsStatus === "success" && output_images_keys) {
-        // 1. Write the result bucket keys to patient-output-images table
-        await saveOutputImageKeysToDB(doctor_id, patient_id, iterationId, output_images_keys);
-
-        // 2. Create publicly visible signed URLs (1 hour)
-        const signedUrls = await generateSignedUrls(output_images_keys);
-
-        // Emit success to frontend
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("prediction_complete", {
-            status: "success",
-            patient_id,
-            iterationId,
-            urls: signedUrls,
-          });
-        } 
-      } else {
-        
-        if (targetSocketId) {
-          io.to(targetSocketId).emit("prediction_complete", {
-            status: "error",
-            message: response.message || "An unknown error occurred during inference",
-          });
-        }
-      }
-
-      return res.status(200).send("Message Processed");
     }
 
-    res.status(200).send("Unknown message type");
+    // =========================
+    // Unknown Message Type
+    // =========================
+    if (snsMessageType !== "Notification") {
+      return res.status(httpStatus.BAD_REQUEST).send("Unknown message type");
+    }
+
+    // =========================
+    // Acknowledge SNS Immediately
+    // =========================
+    res.status(httpStatus.OK).send("Message Received");
+
+    // =========================
+    // Parse Notification
+    // =========================
+    const payload = JSON.parse(body.Message);
+
+    const { status, data, message } = payload;
+
+    const {
+      doctor_id,
+      patient_id,
+      iterationId,
+      output_images_keys,
+    } = data || {};
+
+    // =========================
+    // Validation
+    // =========================
+    validateSnsPayload({
+      doctor_id,
+      patient_id,
+      iterationId,
+      output_images_keys,
+    });
+
+    // =========================
+    // Process Result
+    // =========================
+    const signedUrls = await processInferenceResult(
+      doctor_id,
+      patient_id,
+      iterationId,
+      output_images_keys,
+    );
+
+    // Duplicate SNS delivery
+    if (!signedUrls) {
+      return;
+    }
+
+    // =========================
+    // Emit Success
+    // =========================
+    emitToDoctor(io, doctor_id, {
+      status: status || "success",
+      message: message || "Inference completed successfully",
+      data: signedUrls,
+    });
 
   } catch (error) {
+
     console.error("SNS Webhook Error:", error);
-    res.status(500).send("Server Error");
+
+    try {
+
+      const body =
+        typeof req.body === "string"
+          ? JSON.parse(req.body)
+          : req.body;
+
+      const payload = body?.Message
+        ? JSON.parse(body.Message)
+        : null;
+
+      const doctor_id = payload?.data?.doctor_id;
+
+      if (doctor_id) {
+        emitToDoctor(io, doctor_id, {
+          status: "error",
+          message: "An unknown error occurred during inference",
+        });
+      }
+
+    } catch (innerError) {
+
+      console.error(
+        "Error handling SNS webhook error:",
+        innerError,
+      );
+    }
   }
 };
 
-export const uploadImagesController = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const patientId  = req.body?.patientId;
-    if(!patientId) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "patientId is required in the request body");
+export const uploadImagesController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const patientId = req.body?.patientId;
+    if (!patientId) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "patientId is required in the request body",
+      );
     }
-    debugger;
 
-    
-    const iterationId = `iter_${uuidv4()}`; 
-    
+    const iterationId = `iter_${uuidv4()}`;
 
-     const files = req.files as {
+    const files = req.files as {
       [fieldname: string]: Express.Multer.File[];
     };
 
@@ -115,28 +159,35 @@ export const uploadImagesController = catchAsync(async (req: Request, res: Respo
     const frontCsv = files.frontCsv?.[0];
 
     if (!leftImage || !rightImage || !frontImage || !frontCsv) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "All images and CSV file are required");
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "All images and CSV file are required",
+      );
     }
-
 
     //Upload images to S3 and get their URLs
 
-    const uploadedData: UploadedDataObject = await uploadImagesToS3(files, patientId, iterationId,req.user?.id!);
-    
+    const uploadedData: UploadedDataObject = await uploadImagesToS3(
+      files,
+      patientId,
+      iterationId,
+      req.user?.id!,
+    );
+
     // save bucket keys to DB
     await saveInputImageKeysToDB(uploadedData);
 
     console.log("SNS UPLOADED MESSAGE = ", uploadedData);
     // 3. Push the message to SQS
     await pushToSqsQueue(uploadedData);
-  
+
     res.status(httpStatus.ACCEPTED).json({
       status: "success",
       message: "Images successfully uploaded and queued for ML processing.",
       data: {
-        iterationId : iterationId,
-        status: "PROCESSING"
-      }
+        iterationId: iterationId,
+        status: "PROCESSING",
+      },
     });
-
-  } );
+  },
+);

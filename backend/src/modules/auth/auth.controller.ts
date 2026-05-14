@@ -3,16 +3,16 @@ import { catchAsync } from "../../helpers/error.handlers.js";
 import { createAccessToken } from "../../helpers/auth/access.js";
 import { createRefreshToken, verifyRefreshToken } from "../../helpers/auth/refresh.js";
 import passport from "passport";
+import httpStatus from "http-status";
 
 
 
 export const googleCallbackController = catchAsync(
   async (req: Request, res: Response) => {
 
-   debugger;
+   
     
     let from = req.query.state as string || "/home";
-    debugger;
     const doctor = req.user as any;
 
     const accessToken = createAccessToken(doctor.id);
@@ -44,7 +44,7 @@ export const meController = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
    
 
-        return res.status(200).json({
+        return res.status(httpStatus.OK).json({
           success: true,
           message: "Authenticated successfully",
           user: req.user,
@@ -60,13 +60,13 @@ export const refreshTokenController = catchAsync(
     const refreshToken = req.cookies?.["refresh-token"];
 
     if (!refreshToken) {
-      return res.status(401).json({ message: "No refresh token provided" });
+      return res.status(httpStatus.UNAUTHORIZED).json({ message: "No refresh token provided" });
     }
 
     const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded || !decoded.id) {
-      return res.status(401).json({ message: "Invalid or expired refresh token" });
+      return res.status(httpStatus.UNAUTHORIZED).json({ message: "Invalid or expired refresh token" });
     }
 
     const newAccessToken = createAccessToken(decoded.id);
@@ -77,7 +77,7 @@ export const refreshTokenController = catchAsync(
       sameSite: "lax",
     });
 
-    res.status(200).json({
+    res.status(httpStatus.OK).json({
       success: true,
       message: "Access token refreshed successfully",
     });

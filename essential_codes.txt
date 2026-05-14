@@ -33,9 +33,9 @@ docker run -it `
   -v $env:USERPROFILE\.aws:/root/.aws `
   -e AWS_REGION=ap-south-1 `
   -e BUCKET_NAME=jawsight-image-processor-dev-data `
-  -e SNS_TOPIC_ARN=arn:aws:sqs:ap-south-1:915658834610:jawsight-image-processor-image-processing-queue `
-  -e ENVIRONMENT=development `
-  jawsight/lambda-image-processing
+  -e SNS_TOPIC_ARN=arn:aws:sns:ap-south-1:915658834610:jawsight-image-processor-dev-notifications `
+  -e ENV=development `
+  lambda-image
 
 
 
@@ -45,6 +45,30 @@ curl http://localhost:9000/2015-03-31/functions/function/invocations `
   -Method POST `
   -InFile test_event.json `
   -ContentType "application/json"
+
+
+
+  
+SNS UPLOADED MESSAGE =  {
+  doctor_id: '1',
+  patient_id: '1',
+  iterationId: 'iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8',
+  input_image_details: [
+    {
+      side: 'left',
+      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/left.png'
+    },
+    {
+      side: 'right',
+      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/right.png'
+    },
+    {
+      side: 'front',
+      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/front.png',
+      csv_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/front.csv'
+    }
+  ]
+}
 
 
 
@@ -534,23 +558,5 @@ Your controller
 
 
 
-SNS UPLOADED MESSAGE =  {
-  doctor_id: '1',
-  patient_id: '1',
-  iterationId: 'iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8',
-  input_image_details: [
-    {
-      side: 'left',
-      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/left.png'
-    },
-    {
-      side: 'right',
-      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/right.png'
-    },
-    {
-      side: 'front',
-      bucket_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/front.png',
-      csv_key: '1/1/iter_68df6f83-5467-4cd5-a5ce-174b7c9a9de8/input/front.csv'
-    }
-  ]
-}
+
+

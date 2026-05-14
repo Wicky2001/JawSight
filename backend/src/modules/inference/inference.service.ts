@@ -1,22 +1,22 @@
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { s3Client } from "../../helpers/aws.js";
-import {sqsClient} from "../../helpers/aws.js";
+import { sqsClient } from "../../helpers/aws.js";
 import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { UploadedDataObject } from "./types.js";
 import db from "../../sequelize_models/index.js";
 import ApiError from "../../helpers/ApiError.js";
 import status from "http-status";
-
+import { doctorSocketMap } from "../../helpers/socket.helper.js";
+import { Socket } from "socket.io";
+import { th } from "zod/locales";
 
 export const pushToSqsQueue = async (messageBody: UploadedDataObject) => {
-  const queueUrl = process.env.SQS_QUEUE_URL; 
+  const queueUrl = process.env.SQS_QUEUE_URL;
 
   if (!queueUrl) {
     throw new Error("SQS_QUEUE_URL is not defined in environment variables");
   }
-
-
 
   const command = new SendMessageCommand({
     QueueUrl: queueUrl,
@@ -26,12 +26,14 @@ export const pushToSqsQueue = async (messageBody: UploadedDataObject) => {
   try {
     const response = await sqsClient.send(command);
 
-  
     return response;
   } catch (error) {
-
-    throw new ApiError(status.INTERNAL_SERVER_ERROR, error instanceof Error ? error.message : "Unknown error while sending input image details to SQS");
- 
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      error instanceof Error
+        ? error.message
+        : "Unknown error while sending input image details to SQS",
+    );
   }
 };
 
@@ -47,9 +49,6 @@ const uploadSingleFile = async (file: Express.Multer.File, key: string) => {
   );
 };
 
-
-
-
 export const uploadImagesToS3 = async (
   files: { [fieldname: string]: Express.Multer.File[] },
 
@@ -59,7 +58,6 @@ export const uploadImagesToS3 = async (
 
   doctorId: number,
 ): Promise<UploadedDataObject> => {
-
   const input_image_details: {
     side: string;
     bucket_key: string;
@@ -145,7 +143,14 @@ export const saveInputImageKeysToDB = async (
       const doctorIdNum = uploadedData.doctor_id;
       const patientIdNum = uploadedData.patient_id;
 
-      console.log("Saving input image keys to DB for doctorId:", doctorIdNum, "patientId:", patientIdNum, "iterationId:", uploadedData.iterationId);
+      console.log(
+        "Saving input image keys to DB for doctorId:",
+        doctorIdNum,
+        "patientId:",
+        patientIdNum,
+        "iterationId:",
+        uploadedData.iterationId,
+      );
 
       // Verify the patient actually exists first
       const existingPatient = await db.Patient.findOne({
@@ -171,9 +176,9 @@ export const saveInputImageKeysToDB = async (
               direction: "in",
               view_position: imageDetail.side, // Ensure 'front', 'left', or 'right'
             },
-            { transaction: t }
+            { transaction: t },
           );
-        }
+        },
       );
 
       await Promise.all(imageCreationPromises);
@@ -184,7 +189,7 @@ export const saveInputImageKeysToDB = async (
     }
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      `Database error: ${err.message || "Unknown database error"}`
+      `Database error: ${err.message || "Unknown database error"}`,
     );
   }
 };
@@ -193,12 +198,16 @@ export const saveOutputImageKeysToDB = async (
   doctorId: number | string,
   patientId: number | string,
   iterationId: string,
-  outputKeys: { left: string; right: string; front: string }
+  outputKeys: { left: string; right: string; front: string },
 ): Promise<void> => {
   try {
     await db.sequelize.transaction(async (t) => {
-      const doctorIdNum = typeof doctorId === 'string' ? parseInt(doctorId.replace(/\D/g, ""), 10) : doctorId;
-      const patientIdNum = typeof patientId === 'string' ? parseInt(patientId, 10) : patientId;
+      const doctorIdNum =
+        typeof doctorId === "string"
+          ? parseInt(doctorId.replace(/\D/g, ""), 10)
+          : doctorId;
+      const patientIdNum =
+        typeof patientId === "string" ? parseInt(patientId, 10) : patientId;
 
       const existingPatient = await db.Patient.findOne({
         where: { id: patientIdNum },
@@ -211,37 +220,35 @@ export const saveOutputImageKeysToDB = async (
 
       const sides = ["left", "right", "front"] as const;
 
-      const inputImageList = sides.map((side)=>{
-         return {
-            patient_id: patientIdNum,
-            doctor_id: doctorIdNum,
-            bucket_key: outputKeys[side],
-            iteration_code: iterationId,
-            direction: "out",
-            view_position: side,
-          }
+      const inputImageList = sides.map((side) => {
+        return {
+          patient_id: patientIdNum,
+          doctor_id: doctorIdNum,
+          bucket_key: outputKeys[side],
+          iteration_code: iterationId,
+          direction: "out",
+          view_position: side,
+        };
       });
-      
-     
-        await db.PatientOutputImage.bulkCreate(
-          inputImageList,
-          { transaction: t }
-        );
-      
 
+      await db.PatientOutputImage.bulkCreate(inputImageList, {
+        transaction: t,
+      });
     });
   } catch (err: any) {
     console.error("saveOutputImageKeysToDB error", err);
     throw new ApiError(
       status.INTERNAL_SERVER_ERROR,
-      `Database error: ${err.message || "Unknown database error"}`
+      `Database error: ${err.message || "Unknown database error"}`,
     );
   }
 };
 
-export const generateSignedUrls = async (
-  outputKeys: { left: string; right: string; front: string }
-) => {
+export const generateSignedUrls = async (outputKeys: {
+  left: string;
+  right: string;
+  front: string;
+}) => {
   try {
     const urls: Record<string, string> = {};
 
@@ -258,5 +265,100 @@ export const generateSignedUrls = async (
   } catch (error) {
     console.error("Failed to generate signed URLs", error);
     throw new Error("Could not generate signed URLs");
+  }
+};
+
+export const processInferenceResult = async (
+  doctor_id: number,
+  patient_id: number,
+  iterationId: string,
+  output_images_keys: { left: string; right: string; front: string },
+) => {
+
+  try {
+
+    // Check for duplicatess
+    const existingRecords = await db.PatientOutputImage.findAll({
+      where: {
+        patient_id,
+        iteration_code: iterationId,
+      },
+    });
+
+    // If already 3 records exist, SNS duplicate delivery happened
+    if (existingRecords.length >= 3) {
+      console.log(
+        `Duplicate SNS delivery detected for patient ${patient_id}, iteration ${iterationId}`
+      );
+
+      return null;
+    }
+
+    // Save new records
+    await saveOutputImageKeysToDB(
+      doctor_id,
+      patient_id,
+      iterationId,
+      output_images_keys,
+    );
+
+    // Generate signed URLs
+    const signedUrls = await generateSignedUrls(output_images_keys);
+
+    return signedUrls;
+
+  } catch (error) {
+
+    console.error("Error processing inference result:", error);
+
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "Error processing inference result: " + (error instanceof Error ? error.message : "Unknown error")
+    );
+  }
+};
+
+
+
+
+export const emitToDoctor = (
+  io: Socket,
+  doctor_id: string,
+  payload: any,
+) => {
+
+  const targetSocketId =
+    doctorSocketMap.get(doctor_id);
+
+  if (!targetSocketId) {
+    return;
+  }
+
+  io.to(targetSocketId).emit(
+    "prediction_complete",
+    payload,
+  );
+};
+
+
+
+export const confirmSnsSubscription = async (
+  subscribeURL: string,
+) => {
+
+  if (!subscribeURL) {
+    throw new ApiError(
+      status.BAD_REQUEST,
+      "Missing SubscribeURL",
+    );
+  }
+
+  const response = await fetch(subscribeURL);
+
+  if (!response.ok) {
+    throw new ApiError(
+      status.INTERNAL_SERVER_ERROR,
+      "SNS subscription confirmation failed",
+    );
   }
 };

@@ -1,5 +1,4 @@
 import boto3
-from config.settings import ENV, AWS_PROFILE
 from utils.logger import logger
 
 _session = None
