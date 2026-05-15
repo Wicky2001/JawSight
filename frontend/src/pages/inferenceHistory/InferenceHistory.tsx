@@ -1,10 +1,10 @@
-import {Table} from '../../helpers/ui/TableComponent';
-import type { ColumnDef } from '../../helpers/ui/TableComponent';
-import PageHeader from '../../helpers/ui/PageHeader';
-import { Activity } from 'lucide-react';
-import { useInferenceHistory } from './UseInferenceHistory';
-import type { InferenceHistoryRowType } from '../../../../shared/types/inferenceHistory.types';
-import { useNavigate } from 'react-router-dom';
+import { Table } from "../../helpers/ui/TableComponent";
+import type { ColumnDef } from "../../helpers/ui/TableComponent";
+import PageHeader from "../../helpers/ui/PageHeader";
+import { History } from "lucide-react";
+import { useInferenceHistory } from "./UseInferenceHistory";
+import type { InferenceHistoryRowType } from "../../../../shared/types/inferenceHistory.types";
+import { useNavigate } from "react-router-dom";
 
 const InferenceHistory = () => {
   const {
@@ -20,15 +20,32 @@ const InferenceHistory = () => {
   const navigate = useNavigate();
 
   const columns: ColumnDef[] = [
-    { headerName: "Patient", field: "patient_name", width: 220, sortable: true },
+    {
+      headerName: "Patient",
+      field: "patient_name",
+      width: 220,
+      sortable: true,
+    },
     { headerName: "Iteration Code", field: "iteration_code", width: 180 },
     { headerName: "Status", field: "status", width: 180, sortable: true },
-    { headerName: "Start Time", field: "createdAt", width: 220, sortable: true },
+    {
+      headerName: "Start Time",
+      field: "createdAt",
+      width: 220,
+      sortable: true,
+    },
     { headerName: "End Time", field: "updatedAt", width: 220, sortable: true },
   ];
 
   const handleRowClick = (row: InferenceHistoryRowType) => {
-    navigate(`/patients/${row.patient_id}`);
+    if (row.patient_id && row.iteration_code && row.patient_name) {
+      const pid = encodeURIComponent(String(row.patient_id));
+      const pname = encodeURIComponent(String(row.patient_name));
+      const itr = encodeURIComponent(String(row.iteration_code));
+
+      navigate(`/inference-history-detail-view/${pid}/${pname}/${itr}`);
+    }
+    return;
   };
 
   return (
@@ -37,13 +54,13 @@ const InferenceHistory = () => {
         <PageHeader
           title="Inference History"
           description="Monitor past inferences and generation processes."
-          Icon={Activity}
+          Icon={History}
         />
 
         <div className="w-full overflow-hidden mt-4 h-full flex-1 min-h-0">
-          <Table 
-            cols={columns} 
-            rows={rows} 
+          <Table
+            cols={columns}
+            rows={rows}
             loading={loading}
             totalRecords={totalRecords}
             lastSynced={lastSynced}
@@ -52,7 +69,7 @@ const InferenceHistory = () => {
             onSearchChange={handleSearchChange}
             onLoadMoreRecords={handleLoadMore}
             onSortChange={handleSortChange}
-            clickable={true} 
+            clickable={true}
             onRowClick={handleRowClick}
           />
         </div>

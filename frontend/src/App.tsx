@@ -1,15 +1,16 @@
-import { Route, Routes, Link, useLocation } from 'react-router-dom';
-import { Activity } from 'lucide-react';
+import { Route, Routes, Link, useLocation, Navigate } from "react-router-dom";
+import { Activity } from "lucide-react";
 
 // pages
-import Inference from './pages/inference/Inference';
-import InferenceHistory from './pages/inferenceHistory/InferenceHistory';
-import Home from './pages/home/Home';
-import Login from './pages/login/Login';
-import ProtectedRoute from './helpers/ProtectedRoute';
+import Inference from "./pages/inference/Inference";
+import InferenceHistory from "./pages/inferenceHistory/InferenceHistory";
+import InferenceHistoryDetailView from "./pages/inferenceHistory/inferenceHistoryDetailView/inferenceHisoryDetailView";
+import Home from "./pages/home/Home";
+import Login from "./pages/login/Login";
+import ProtectedRoute from "./helpers/ProtectedRoute";
 
 //css
-import './App.css';
+import "./App.css";
 
 function App() {
   const location = useLocation();
@@ -24,19 +25,24 @@ function App() {
             <span className="text-xl font-bold tracking-tight">JawSight</span>
           </Link>
           <div className="flex gap-8 text-sm font-medium text-slate-500">
-            <Link 
-              to="/inference" 
-              className={`${location.pathname === '/inference' ? 'text-teal-600 border-b-2 border-teal-600' : 'hover:text-slate-800 transition-colors'} pb-1`}
+            <Link
+              to="/inference"
+              className={`${location.pathname === "/inference" ? "text-teal-600 border-b-2 border-teal-600" : "hover:text-slate-800 transition-colors"} pb-1`}
             >
               Inference
             </Link>
-            <Link 
-              to="/inference-history" 
-              className={`${location.pathname === '/inference-history' ? 'text-teal-600 border-b-2 border-teal-600' : 'hover:text-slate-800 transition-colors'} pb-1`}
+            <Link
+              to="/inference-history"
+              className={`${location.pathname === "/inference-history" ? "text-teal-600 border-b-2 border-teal-600" : "hover:text-slate-800 transition-colors"} pb-1`}
             >
               History
             </Link>
-            <Link to="#" className="hover:text-slate-800 transition-colors pb-1">About Us</Link>
+            <Link
+              to="#"
+              className="hover:text-slate-800 transition-colors pb-1"
+            >
+              About Us
+            </Link>
           </div>
         </div>
       </nav>
@@ -50,6 +56,10 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/inference" element={<Inference />} />
             <Route path="/inference-history" element={<InferenceHistory />} />
+            <Route
+              path="/inference-history-detail-view/:patient_id/:patient_name/:inference_id"
+              element={<InferenceHistoryDetailView />}
+            />
           </Route>
         </Routes>
       </main>

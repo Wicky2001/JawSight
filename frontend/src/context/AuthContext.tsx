@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { api } from  '../helpers/apiClient/apiClient';
+import { api } from "../helpers/apiClient/apiClient";
 
 type User = {
   id: string;
@@ -8,7 +8,7 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
-  isLoading:boolean;
+  isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -27,19 +27,15 @@ export const AuthProvider = ({ children }: Props) => {
   const isAuthenticated = !!user;
 
   useEffect(() => {
-
-
     if (window.location.pathname === "/login") {
-    setIsLoading(false);
-    return;
-  }
+      setIsLoading(false);
+      return;
+    }
     const initAuth = async () => {
-      
       try {
-        
         const res = await api.get("/auth/me");
+        debugger;
         setUser(res.data.user);
-        
       } catch {
         setUser(null);
       } finally {
@@ -49,7 +45,6 @@ export const AuthProvider = ({ children }: Props) => {
 
     initAuth();
   }, []);
-
 
   const login = async (email: string, password: string) => {
     const res = await api.post("/auth/login", { email, password });
@@ -62,12 +57,13 @@ export const AuthProvider = ({ children }: Props) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, isAuthenticated, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
-
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
