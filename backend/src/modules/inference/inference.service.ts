@@ -9,7 +9,6 @@ import ApiError from "../../helpers/ApiError.js";
 import status from "http-status";
 import { doctorSocketMap } from "../../helpers/socket.helper.js";
 import { Socket } from "socket.io";
-import { th } from "zod/locales";
 
 export const pushToSqsQueue = async (messageBody: UploadedDataObject) => {
   const queueUrl = process.env.SQS_QUEUE_URL;
@@ -136,20 +135,9 @@ export const saveInputImageKeysToDB = async (
 ): Promise<void> => {
   try {
     await db.sequelize.transaction(async (t) => {
-      // uploadedData.doctor_id might be something like 'D_5', extract the integer
       const doctorIdNum = uploadedData.doctor_id;
       const patientIdNum = uploadedData.patient_id;
 
-      console.log(
-        "Saving input image keys to DB for doctorId:",
-        doctorIdNum,
-        "patientId:",
-        patientIdNum,
-        "iterationId:",
-        uploadedData.iterationId,
-      );
-
-      // Verify the patient actually exists first
       const existingPatient = await db.Patient.findOne({
         where: {
           id: patientIdNum,
@@ -161,24 +149,44 @@ export const saveInputImageKeysToDB = async (
         throw new ApiError(status.NOT_FOUND, "Patient not found");
       }
 
-      // Create all the input image entries
-      const imageCreationPromises = uploadedData.input_image_details.map(
-        (imageDetail) => {
-          return db.PatientInputImage.create(
-            {
-              patient_id: patientIdNum,
-              doctor_id: doctorIdNum,
-              bucket_key: imageDetail.bucket_key,
-              iteration_code: uploadedData.iterationId,
-              direction: "in",
-              view_position: imageDetail.side, // Ensure 'front', 'left', or 'right'
-            },
-            { transaction: t },
-          );
+      const input_keys: { left?: string; right?: string; front?: string; front_csv?: string } = {};
+
+      uploadedData.input_image_details.forEach((detail) => {
+        if (detail.side === "left") input_keys.left = detail.bucket_key;
+        if (detail.side === "right") input_keys.right = detail.bucket_key;
+        if (detail.side === "front") {
+          input_keys.front = detail.bucket_key;
+          input_keys.front_csv = detail.csv_key;
+        }
+      });
+
+      const inferenceHistory = await db.InferenceHistory.create(
+        {
+          patient_id: patientIdNum,
+          doctor_id: doctorIdNum,
+          iteration_code: uploadedData.iterationId,
+          input_bucket_keys: input_keys,
+          status: "PROCESSING",
         },
+        { transaction: t }
       );
 
-      await Promise.all(imageCreationPromises);
+      // Set timeout to mark as failed if processing takes longer than 15 minutes
+      setTimeout(async () => {
+        try {
+          await db.sequelize.transaction(async (timeoutTx) => {
+            const record = await db.InferenceHistory.findOne({
+              where: { id: inferenceHistory.id },
+              transaction: timeoutTx,
+            });
+            if (record && record.status === "PROCESSING") {
+              await record.update({ status: "FAILED" }, { transaction: timeoutTx });
+            }
+          });
+        } catch (err) {
+          console.error("Timeout update failed for inferenceHistory ID:", inferenceHistory.id, err);
+        }
+      }, 15 * 60 * 1000); // 15 minutes
     });
   } catch (err: any) {
     if (err instanceof ApiError) {
@@ -206,31 +214,26 @@ export const saveOutputImageKeysToDB = async (
       const patientIdNum =
         typeof patientId === "string" ? parseInt(patientId, 10) : patientId;
 
-      const existingPatient = await db.Patient.findOne({
-        where: { id: patientIdNum },
+      const existingRecord = await db.InferenceHistory.findOne({
+        where: {
+          doctor_id: doctorIdNum,
+          patient_id: patientIdNum,
+          iteration_code: iterationId,
+        },
         transaction: t,
       });
 
-      if (!existingPatient) {
-        throw new ApiError(status.NOT_FOUND, "Patient not found");
+      if (!existingRecord) {
+        throw new ApiError(status.NOT_FOUND, "Inference record not found");
       }
 
-      const sides = ["left", "right", "front"] as const;
-
-      const inputImageList = sides.map((side) => {
-        return {
-          patient_id: patientIdNum,
-          doctor_id: doctorIdNum,
-          bucket_key: outputKeys[side],
-          iteration_code: iterationId,
-          direction: "out",
-          view_position: side,
-        };
-      });
-
-      await db.PatientOutputImage.bulkCreate(inputImageList, {
-        transaction: t,
-      });
+      await existingRecord.update(
+        {
+          output_bucket_keys: outputKeys,
+          status: "COMPLETED",
+        },
+        { transaction: t }
+      );
     });
   } catch (err: any) {
     console.error("saveOutputImageKeysToDB error", err);
@@ -274,16 +277,16 @@ export const processInferenceResult = async (
 
   try {
 
-    // Check for duplicatess
-    const existingRecords = await db.PatientOutputImage.findAll({
+    // Check for duplicates
+    const existingRecord = await db.InferenceHistory.findOne({
       where: {
         patient_id,
         iteration_code: iterationId,
       },
     });
 
-    // If already 3 records exist, SNS duplicate delivery happened
-    if (existingRecords.length >= 3) {
+    // If already COMPLETED, SNS duplicate delivery happened
+    if (existingRecord && existingRecord.status === "COMPLETED") {
       console.log(
         `Duplicate SNS delivery detected for patient ${patient_id}, iteration ${iterationId}`
       );
@@ -291,7 +294,7 @@ export const processInferenceResult = async (
       return null;
     }
 
-    // Save new records
+    // Save outputs and update status
     await saveOutputImageKeysToDB(
       doctor_id,
       patient_id,
@@ -305,18 +308,14 @@ export const processInferenceResult = async (
     return signedUrls;
 
   } catch (error) {
-
-    console.error("Error processing inference result:", error);
-
-    throw new ApiError(
-      status.INTERNAL_SERVER_ERROR,
-      "Error processing inference result: " + (error instanceof Error ? error.message : "Unknown error")
-    );
+    if (error instanceof ApiError && error.statusCode === status.NOT_FOUND) {
+        console.error("Inference record not found during SNS processing", error);
+        return null;
+    }
+    console.error("Failed to process inference result", error);
+    throw error;
   }
 };
-
-
-
 
 export const emitToDoctor = (
   io: Socket,

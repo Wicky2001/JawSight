@@ -45,7 +45,6 @@ export class Patient extends Model {
 
   static associate(models: any) {
     Patient.belongsTo(models.Doctor, { foreignKey: 'doctor_id', as: 'doctor' });
-    Patient.hasMany(models.PatientInputImage, { foreignKey: 'patient_id', as: 'input_images' });
-    Patient.hasMany(models.PatientOutputImage, { foreignKey: 'patient_id', as: 'output_images' });
+    Patient.hasMany(models.InferenceHistory, { foreignKey: 'patient_id', as: 'inference_histories' });
   }
 }

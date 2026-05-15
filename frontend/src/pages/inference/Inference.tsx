@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Info, CheckCircle, Image as ImageIcon, AlertCircle, Loader2 } from 'lucide-react';
 import { api } from '../../helpers/apiClient/apiClient';
 import { dataURLtoFile } from '../../helpers/utils';
@@ -6,9 +6,9 @@ import { InfoCallout } from '../../helpers/ui/InfoCallout';
 import { Toast } from '../../helpers/ui/Toast';
 import { UploadZone } from './UploadZone';
 import { LandmarkModal } from './LandmarkModal';
-import { useSocket } from '../../context/SocketContext'; // Assuming you have a hook
-import { useEffect } from 'react';
-export const InferenceComponent: React.FC = () => {
+import { useSocket } from '../../context/SocketContext';
+
+const Inference = () => {
   const [images, setImages] = useState<{ left: string | null; right: string | null; front: string | null }>({ left: null, right: null, front: null });
   const [csvData, setCsvData] = useState<string | null>(null);
   const [savedPointsArray, setSavedPointsArray] = useState<any[] | null>(null);
@@ -21,7 +21,6 @@ export const InferenceComponent: React.FC = () => {
 
   useEffect(() => {
     if (latestPrediction) {
-      // Something was completed!
       setIsSubmitting(false);
 
       if (latestPrediction.status === 'success') {
@@ -64,7 +63,6 @@ export const InferenceComponent: React.FC = () => {
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      //TODO - need to update with actual patient ID logic
       formData.append('patientId', '1'); 
       formData.append('leftImage', dataURLtoFile(images.left as string, 'left'));
       formData.append('rightImage', dataURLtoFile(images.right as string, 'right'));
@@ -81,7 +79,7 @@ export const InferenceComponent: React.FC = () => {
     } catch (error: any) {
       console.error("Submission failed:", error);
       setToastMsg(error.response?.data?.message || "Failed to submit data. Please try again.");
-      setIsSubmitting(false); // Only stop loading on error. If success, wait for socket event!
+      setIsSubmitting(false); 
     }
   };
 
@@ -98,23 +96,27 @@ export const InferenceComponent: React.FC = () => {
         />
       )}
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* Main container remains h-full and handles the scrolling for the whole page */}
+      <main className="max-w-7xl mx-auto px-6 py-8 h-full flex flex-col overflow-y-auto">
         
-        <header className="mb-8">
+        <header className="mb-8 shrink-0">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">New Patient Inference</h1>
           <p className="text-slate-500 text-lg">Upload high-quality patient profiles to generate predictive mandibular outcomes.</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Removed flex-1 and min-h-0 so the grid expands naturally based on its content */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
           
-          <div className="lg:col-span-7 flex flex-col gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-1">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          <div className="lg:col-span-7 flex flex-col">
+            {/* Removed overflow-y-auto to stop inner scrolling. Added h-full to match the right card's height */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 shrink-0">
                 <ImageIcon className="w-5 h-5 text-slate-400" />
                 1. Side Profiles
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 h-[320px]">
+              {/* Restored generous height (min-h-[320px]) since it can safely push the page down now */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 min-h-[320px]">
                 <UploadZone 
                   id="left" 
                   title="Left Profile" 
@@ -137,7 +139,8 @@ export const InferenceComponent: React.FC = () => {
                 />
               </div>
 
-              <div className="space-y-3">
+              {/* Added mt-auto to push callouts to the bottom evenly */}
+              <div className="space-y-3 shrink-0 mt-auto">
                 <InfoCallout icon={AlertCircle} title="Required Framing" type="warning">
                   There must be a clear <strong>mid-side gap</strong> between the tip of the chin and the edge of the image border. Do not crop tightly around the jaw.
                 </InfoCallout>
@@ -148,9 +151,10 @@ export const InferenceComponent: React.FC = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+          <div className="lg:col-span-5 flex flex-col">
+            {/* Removed overflow-y-auto. Added h-full */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full">
+              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 shrink-0">
                 <ImageIcon className="w-5 h-5 text-slate-400" />
                 2. Front Profile
               </h2>
@@ -170,18 +174,21 @@ export const InferenceComponent: React.FC = () => {
                 />
               </div>
 
-              <InfoCallout icon={CheckCircle} title="Data Requirement" type={csvData ? 'success' : 'warning'}>
-                {csvData 
-                  ? "Landmark data (front.csv) has been successfully generated and attached to this profile."
-                  : "After uploading the front face, you must mark the required facial landmarks to generate the front.csv file."
-                }
-              </InfoCallout>
+              <div className="shrink-0 mt-auto">
+                <InfoCallout icon={CheckCircle} title="Data Requirement" type={csvData ? 'success' : 'warning'}>
+                  {csvData 
+                    ? "Landmark data (front.csv) has been successfully generated and attached to this profile."
+                    : "After uploading the front face, you must mark the required facial landmarks to generate the front.csv file."
+                  }
+                </InfoCallout>
+              </div>
             </div>
           </div>
 
         </div>
 
-        <div className="mt-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Action Footer */}
+        <div className="shrink-0 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
             {!isReadyToSubmit ? (
               <p className="text-slate-500 text-sm flex items-center gap-2">
@@ -220,3 +227,5 @@ export const InferenceComponent: React.FC = () => {
     </>
   );
 };
+
+export default Inference;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { de } from 'zod/locales';
+
 
 
 // --- API Client Setup ---
@@ -23,29 +23,29 @@ const refreshClient = axios.create({
 
 client.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
-    
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
+        await refreshClient.post("/auth/refresh");
 
-        
-        // call refresh endpoint
-        const response = await refreshClient.post("/auth/refresh");
-        console.log(response.status);
-  
-        
         return client(originalRequest);
 
-      } catch (err) {
-        
-        // logout if refresh fails
-        window.location.href = `/login?from=${encodeURIComponent(currentPath)}`;
-        return Promise.reject(err);
+      } catch (refreshError: any) {
+
+        if (refreshError.response?.status === 401) {
+          window.location.href =
+            `/login?from=${encodeURIComponent(currentPath)}`;
+        }
+
+        return Promise.reject(refreshError);
       }
     }
 

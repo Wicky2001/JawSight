@@ -2,7 +2,8 @@ import { Route, Routes, Link, useLocation } from 'react-router-dom';
 import { Activity } from 'lucide-react';
 
 // pages
-import { InferenceComponent } from './pages/inference/Inference';
+import Inference from './pages/inference/Inference';
+import InferenceHistory from './pages/inferenceHistory/InferenceHistory';
 import Home from './pages/home/Home';
 import Login from './pages/login/Login';
 import ProtectedRoute from './helpers/ProtectedRoute';
@@ -14,7 +15,7 @@ function App() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
+    <div className="h-screen flex flex-col bg-slate-100 font-sans text-slate-800">
       {/* Global Navigation */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-10 w-full text-left">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -29,21 +30,29 @@ function App() {
             >
               Inference
             </Link>
-            <Link to="#" className="hover:text-slate-800 transition-colors pb-1">History</Link>
+            <Link 
+              to="/inference-history" 
+              className={`${location.pathname === '/inference-history' ? 'text-teal-600 border-b-2 border-teal-600' : 'hover:text-slate-800 transition-colors'} pb-1`}
+            >
+              History
+            </Link>
             <Link to="#" className="hover:text-slate-800 transition-colors pb-1">About Us</Link>
           </div>
         </div>
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/inference" element={<InferenceComponent />} />
-        </Route>
-      </Routes>
+      <main className="flex-1 min-h-0 overflow-hidden">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/inference" element={<Inference />} />
+            <Route path="/inference-history" element={<InferenceHistory />} />
+          </Route>
+        </Routes>
+      </main>
     </div>
   );
 }

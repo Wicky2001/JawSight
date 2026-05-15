@@ -1,0 +1,128 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import axios from 'axios';
+import { fetchInferenceHistory } from './InferenceHistory.service';
+import type {GetInferenceHistoryResponseType,InferenceHistoryRowType } from "../../../../shared/types/inferenceHistory.types.js";
+import { Toast } from '../../helpers/ui/Toast.js';
+
+const DEFAULT_LIMIT = 50;
+
+export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
+  const [loading, setLoading] = useState(false);
+  const [rows, setRows] = useState<InferenceHistoryRowType[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [lastSynced, setLastSynced] = useState('');
+
+  const [searchText, setSearchText] = useState('');
+  const [page, setPage] = useState(1);
+  const [sortField, setSortField] = useState<string | undefined>();
+  const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC' | undefined>();
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
+
+  const requestParams = useMemo(
+    () => ({
+      page,
+      limit: initialLimit,
+      search: searchText.trim() || undefined,
+      sortField,
+      sortOrder,
+    }),
+    [page, initialLimit, searchText, sortField, sortOrder]
+  );
+
+  const cancelPendingRequest = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
+
+  const loadInferenceHistory = useCallback(async () => {
+    cancelPendingRequest();
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const requestId = ++requestIdRef.current;
+
+    setLoading(true);
+
+    try {
+      const result:GetInferenceHistoryResponseType = await fetchInferenceHistory(requestParams, {
+        signal: controller.signal,
+      });
+
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      const nextRows = result.rows.map(item => ({
+        ...item
+      }));
+
+      const mode = requestParams.page === 1 ? 'replace' : 'append';
+
+      setRows((currentRows) =>
+        mode === 'append' ? [...currentRows, ...nextRows] : nextRows
+      );
+      setTotalRecords(result.meta.total);
+      setLastSynced( new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }));
+    } catch (error) {
+      if (axios.isCancel(error)) {
+        return;
+      }
+
+      console.error('Failed to fetch inference history', error);
+      Toast({
+        message: 'Failed to load inference history. Please try again.',
+        error: true,
+        onClose: () => {}
+      });
+    } finally {
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [requestParams, cancelPendingRequest]);
+
+  useEffect(() => {
+    loadInferenceHistory();
+
+    return () => {
+      cancelPendingRequest();
+    };
+  }, [loadInferenceHistory, cancelPendingRequest]);
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchText(value);
+    setPage(1);
+  }, []);
+
+  const handleLoadMore = useCallback(() => {
+    if (loading || rows.length >= totalRecords) {
+      return;
+    }
+    setPage((currentPage) => currentPage + 1);
+  }, [loading, rows.length, totalRecords]);
+
+  const handleSortChange = useCallback(
+    (field: string, order: 'asc' | 'desc' | null) => {
+      setSortField(order ? field : undefined);
+      setSortOrder(order ? (order.toUpperCase() as 'ASC' | 'DESC') : undefined);
+      setPage(1);
+    },
+    []
+  );
+
+  return {
+    loading,
+    rows,
+    totalRecords,
+    lastSynced,
+    searchText,
+    handleSearchChange,
+    handleLoadMore,
+    handleSortChange,
+  };
+};

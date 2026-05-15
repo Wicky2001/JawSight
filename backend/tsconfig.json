@@ -8,12 +8,12 @@
     },
     "typeRoots": ["./node_modules/@types", "./src/helpers/types"],
     "outDir": "./dist",                /* Where the compiled code goes */
-    "rootDir": "./src",
+    "rootDir": "..",
     "strict": true,                    /* Critical for research accuracy */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true
   },
-  "include": ["src", "../shared/src/**/*"] /* Tell TS to look in both folders */
+  "include": ["src", "../shared/src/**/*", "../shared/types/inferenceHistory.types.ts"] /* Tell TS to look in both folders */
 }

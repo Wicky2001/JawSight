@@ -6,8 +6,7 @@
 import { Sequelize } from 'sequelize';
 import { Doctor } from './Doctor.js';
 import { Patient } from './Patient.js';
-import { PatientInputImage } from './PatientInputImage.js';
-import { PatientOutputImage } from './PatientOutputImage.js';
+import { InferenceHistory } from './InferenceHistory.js';
 import { RefreshToken } from './RefreshToken.js';
 import { AuditLog } from './AuditLog.js';
 
@@ -24,8 +23,7 @@ const db = {
   sequelize,  
   Doctor,
   Patient,
-  PatientInputImage,
-  PatientOutputImage,
+  InferenceHistory,
   RefreshToken,
   AuditLog,
 };
