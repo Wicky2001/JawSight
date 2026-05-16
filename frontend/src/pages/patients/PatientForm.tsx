@@ -131,8 +131,8 @@ const PatientForm = ({
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Name Field */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Name <span className="text-red-500">*</span>
+        <label className="block text-sm font-semibold text-primary mb-2">
+          Name <span className="text-destructive">*</span>
         </label>
         <input
           type="text"
@@ -140,15 +140,11 @@ const PatientForm = ({
           value={formData.name}
           onChange={handleChange}
           disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm border rounded-lg transition-all focus:outline-none focus:ring-2 ${
-            errors.name
-              ? "border-red-300 bg-red-50 focus:ring-red-500/30 focus:border-red-400"
-              : "border-slate-300 bg-white hover:border-slate-400 focus:ring-teal-500/30 focus:border-teal-500"
-          } disabled:bg-slate-50 disabled:text-slate-500`}
+          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.name ? "input-invalid" : ""} disabled:opacity-60`}
           placeholder="Enter patient name"
         />
         {errors.name && (
-          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
             <span>•</span> {errors.name}
           </p>
         )}
@@ -156,8 +152,8 @@ const PatientForm = ({
 
       {/* Age Field */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Age <span className="text-red-500">*</span>
+        <label className="block text-sm font-semibold text-primary mb-2">
+          Age <span className="text-destructive">*</span>
         </label>
         <input
           type="number"
@@ -165,17 +161,13 @@ const PatientForm = ({
           value={formData.age}
           onChange={handleChange}
           disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm border rounded-lg transition-all focus:outline-none focus:ring-2 ${
-            errors.age
-              ? "border-red-300 bg-red-50 focus:ring-red-500/30 focus:border-red-400"
-              : "border-slate-300 bg-white hover:border-slate-400 focus:ring-teal-500/30 focus:border-teal-500"
-          } disabled:bg-slate-50 disabled:text-slate-500`}
+          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.age ? "input-invalid" : ""} disabled:opacity-60`}
           placeholder="Enter age"
           min="1"
           max="150"
         />
         {errors.age && (
-          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
             <span>•</span> {errors.age}
           </p>
         )}
@@ -183,8 +175,8 @@ const PatientForm = ({
 
       {/* Email Field */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Email <span className="text-red-500">*</span>
+        <label className="block text-sm font-semibold text-primary mb-2">
+          Email <span className="text-destructive">*</span>
         </label>
         <input
           type="email"
@@ -192,15 +184,11 @@ const PatientForm = ({
           value={formData.email}
           onChange={handleChange}
           disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm border rounded-lg transition-all focus:outline-none focus:ring-2 ${
-            errors.email
-              ? "border-red-300 bg-red-50 focus:ring-red-500/30 focus:border-red-400"
-              : "border-slate-300 bg-white hover:border-slate-400 focus:ring-teal-500/30 focus:border-teal-500"
-          } disabled:bg-slate-50 disabled:text-slate-500`}
+          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.email ? "input-invalid" : ""} disabled:opacity-60`}
           placeholder="Enter email address"
         />
         {errors.email && (
-          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
             <span>•</span> {errors.email}
           </p>
         )}
@@ -208,8 +196,8 @@ const PatientForm = ({
 
       {/* Gender Field */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">
-          Gender <span className="text-red-500">*</span>
+        <label className="block text-sm font-semibold text-primary mb-2">
+          Gender <span className="text-destructive">*</span>
         </label>
         <select
           name="gender"
@@ -218,11 +206,7 @@ const PatientForm = ({
             setFormData((prev) => ({ ...prev, gender: e.target.value }))
           }
           disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm border rounded-lg transition-all focus:outline-none focus:ring-2 ${
-            errors.gender
-              ? "border-red-300 bg-red-50 focus:ring-red-500/30 focus:border-red-400"
-              : "border-slate-300 bg-white hover:border-slate-400 focus:ring-teal-500/30 focus:border-teal-500"
-          } disabled:bg-slate-50 disabled:text-slate-500`}
+          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.gender ? "input-invalid" : ""} disabled:opacity-60`}
         >
           <option value="MALE">Male</option>
           <option value="FEMALE">Female</option>
@@ -238,7 +222,7 @@ const PatientForm = ({
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-6 px-4 py-3 bg-teal-600 text-white text-sm font-semibold rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-500/20 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full mt-6 px-4 py-3 btn-primary text-sm font-semibold rounded-lg hover:brightness-95 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">

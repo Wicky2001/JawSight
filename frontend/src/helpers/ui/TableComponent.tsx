@@ -44,10 +44,34 @@ export type CommonTableProps<T> = {
   onRowClick?: (row: T) => void;
 };
 
-// Fallback status icon rendering if needed
+// Fallback status badge rendering (supports multiple colors)
 const getStatusIcon = (value: number | string) => {
+  const raw = String(value ?? "").trim();
+  const v = raw.toLowerCase();
+  let cls = "badge-neutral";
+
+  if (["success", "completed", "done", "active", "ok"].includes(v)) {
+    cls = "badge-success";
+  } else if (["pending", "processing", "in-progress", "queued"].includes(v)) {
+    cls = "badge-info";
+  } else if (["warning", "attention"].includes(v)) {
+    cls = "badge-warning";
+  } else if (["failed", "error", "rejected", "cancelled"].includes(v)) {
+    cls = "badge-error";
+  } else if (/^\d+$/.test(v)) {
+    // numeric statuses — treat 0 as info, 1 as success, others neutral
+    if (v === "0") cls = "badge-info";
+    else if (v === "1") cls = "badge-success";
+    else cls = "badge-neutral";
+  }
+
   return (
-    <span className="px-2 py-1 bg-slate-100 rounded text-xs">{value}</span>
+    <span
+      className={`badge px-2 py-1 rounded text-xs`}
+      aria-label={`status-${raw}`}
+    >
+      <span className={cls}>{raw}</span>
+    </span>
   );
 };
 
@@ -119,12 +143,12 @@ export const Table = <T extends Record<string, any>>({
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 w-full bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="flex flex-col h-full min-h-0 w-full surface-card border border-primary rounded-xl overflow-hidden card-shadow">
       {/* Toolbar */}
-      <div className="flex flex-row sm:flex-row items-center justify-between p-4 gap-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
+      <div className="flex flex-row sm:flex-row items-center justify-between p-4 gap-4 border-b border-primary bg-page shrink-0">
         {showAdd && (
           <Button
-            className="cursor-pointer inline-flex items-center gap-2 rounded-md bg-[#63A361] hover:bg-[#4E824D] px-3 py-1.5 text-sm/6 font-semibold text-white shadow-inner focus:outline-none transition-colors"
+            className="btn-primary inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-semibold"
             onClick={() => onAdd?.()}
           >
             <CirclePlus size={18} />
@@ -133,26 +157,29 @@ export const Table = <T extends Record<string, any>>({
         )}
         <div className="relative lg:w-1/2">
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary"
             size={18}
           />
           <input
             type="text"
             placeholder="Search records..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 placeholder:text-slate-400 focus:ring-1 focus:ring-[#63A361] outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2 themed-input input-focus text-sm"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-secondary">
           {lastSynced && (
             <div className="flex items-center gap-1.5 font-medium">
               <Clock size={14} />
               <span>Synced: {lastSynced}</span>
             </div>
           )}
-          <div className="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
-          <span className="px-2 py-1 bg-slate-100 rounded-md font-bold text-slate-700">
+          <div className="h-4 w-px border-subtle mx-1 hidden sm:block"></div>
+          <span
+            className="px-2 py-1 rounded-md font-bold text-primary"
+            style={{ background: "transparent" }}
+          >
             {rows.length} / {totalRecords}
           </span>
         </div>
@@ -164,8 +191,8 @@ export const Table = <T extends Record<string, any>>({
         className="flex-1 min-h-0 overflow-x-auto overflow-y-auto relative scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100"
       >
         <table className="w-full text-left border-collapse min-w-[600px]">
-          <thead className="sticky top-0 z-30 shadow-sm">
-            <tr className="bg-slate-50">
+          <thead className="sticky top-0 z-30">
+            <tr className="table-header-bg">
               {cols.map((col) => (
                 <th
                   key={String(col.field)}
@@ -174,7 +201,7 @@ export const Table = <T extends Record<string, any>>({
                       ? () => toggleSort(String(col.field))
                       : undefined
                   }
-                  className={`p-4 text-xs font-semibold text-slate-600 uppercase tracking-wider transition-colors border-b border-slate-200 ${col.sortable ? "cursor-pointer hover:bg-slate-100" : ""}`}
+                  className={`p-4 text-xs font-semibold text-secondary uppercase tracking-wider transition-colors border-b border-primary ${col.sortable ? "cursor-pointer hover-bg" : ""}`}
                   style={{ width: col.width }}
                 >
                   <div className="flex items-center gap-2">
@@ -183,17 +210,11 @@ export const Table = <T extends Record<string, any>>({
                       <div className="flex flex-col text-slate-300">
                         <ChevronUp
                           size={13}
-                          className={`
-                              transition-transform duration-200 hover:scale-125
-                              ${sortField === col.field && sortOrder === "asc" ? "text-blue-500" : ""}
-                            `}
+                          className={`transition-transform duration-200 hover:scale-125 ${sortField === col.field && sortOrder === "asc" ? "text-primary" : "text-muted"}`}
                         />
                         <ChevronDown
                           size={13}
-                          className={`
-                                      transition-transform duration-200 hover:scale-125
-                                      ${sortField === col.field && sortOrder === "asc" ? "text-blue-500" : ""}
-                                    `}
+                          className={`transition-transform duration-200 hover:scale-125 ${sortField === col.field && sortOrder === "desc" ? "text-primary" : "text-muted"}`}
                         />
                       </div>
                     )}
@@ -202,18 +223,18 @@ export const Table = <T extends Record<string, any>>({
               ))}
 
               {(showDelete || showEdit) && (
-                <th className="p-4 text-xs text-center font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200 bg-slate-50 w-32">
+                <th className="p-4 text-xs text-center font-semibold text-secondary uppercase tracking-wider border-b border-primary w-32">
                   Actions
                 </th>
               )}
             </tr>
           </thead>
-          <tbody className="h-full divide-y divide-slate-100">
+          <tbody className="h-full">
             {rows.length === 0 && !loading ? (
               <tr>
                 <td
                   colSpan={cols.length + (showDelete || showEdit ? 1 : 0)}
-                  className=" h-full text-center p-8 text-slate-500"
+                  className=" h-full text-center p-8 text-secondary"
                 >
                   No records found.
                 </td>
@@ -225,12 +246,12 @@ export const Table = <T extends Record<string, any>>({
                   onClick={() => {
                     if (clickable && onRowClick) onRowClick(row);
                   }}
-                  className={`hover:bg-slate-50/50 transition-colors group ${clickable ? "cursor-pointer" : ""}`}
+                  className={`transition-colors group ${clickable ? "cursor-pointer" : ""}`}
                 >
                   {cols.map((col) => (
                     <td
                       key={`${row.id || idx}-${String(col.field)}`}
-                      className="p-4 text-sm text-slate-700 truncate max-w-xs"
+                      className="p-4 text-sm text-primary truncate max-w-xs"
                     >
                       {renderCellValue(row[col.field], String(col.field))}
                     </td>
@@ -241,12 +262,12 @@ export const Table = <T extends Record<string, any>>({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Menu>
-                        <MenuButton className="flex justify-center items-center px-2 py-1 text-black rounded transition-colors cursor-pointer hover:bg-slate-200">
+                        <MenuButton className="flex justify-center items-center px-2 py-1 rounded transition-colors cursor-pointer hover-bg">
                           <Ellipsis size={15} />
                         </MenuButton>
                         <MenuItems
                           anchor="bottom end"
-                          className="[--anchor-gap:3px] [--anchor-padding:3px] bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[120px] focus:outline-none z-50"
+                          className="[--anchor-gap:3px] [--anchor-padding:3px] surface-card border border-primary rounded-lg shadow-lg py-1 min-w-[120px] focus:outline-none z-50"
                         >
                           {showEdit && (
                             <MenuItem>
@@ -256,7 +277,7 @@ export const Table = <T extends Record<string, any>>({
                                     e.stopPropagation();
                                     onEdit?.(row);
                                   }}
-                                  className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${focus ? "bg-slate-100" : ""} text-slate-700`}
+                                  className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${focus ? "hover-bg" : ""} text-primary`}
                                 >
                                   <Edit2 size={14} />
                                   Edit
@@ -272,7 +293,7 @@ export const Table = <T extends Record<string, any>>({
                                     e.stopPropagation();
                                     onDelete?.([row.id || row]);
                                   }}
-                                  className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${focus ? "bg-red-50" : ""} text-red-600`}
+                                  className={`flex items-center gap-2 w-full px-3 py-2 text-sm ${focus ? "hover-bg" : ""} text-destructive`}
                                 >
                                   <Trash2 size={14} />
                                   Delete
@@ -291,10 +312,10 @@ export const Table = <T extends Record<string, any>>({
         </table>
 
         {loading && (
-          <div className="sticky bottom-0 left-0 right-0 p-4 flex justify-center items-center bg-white/80 backdrop-blur-sm z-30">
-            <div className="flex items-center gap-3 px-6 py-2 bg-white border border-slate-200 rounded-full shadow-lg">
-              <Loader2 className="animate-spin text-blue-600" size={18} />
-              <span className="text-sm font-medium text-slate-600">
+          <div className="sticky bottom-0 left-0 right-0 p-4 flex justify-center items-center surface-elevated z-30">
+            <div className="flex items-center gap-3 px-6 py-2 surface-card border border-primary rounded-full card-shadow">
+              <Loader2 className="animate-spin text-primary" size={18} />
+              <span className="text-sm font-medium text-primary">
                 Loading records...
               </span>
             </div>

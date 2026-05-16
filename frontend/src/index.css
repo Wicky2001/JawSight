@@ -1,3 +1,32 @@
-﻿@tailwind base;
+﻿@import "./styles/themes.css";
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Map some base HTML elements to semantic tokens so Tailwind classes can be incrementally replaced */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg-app);
+  color: var(--text-primary);
+}
+
+/* Basic surface/card class */
+.card {
+  background: var(--color-surface-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-card);
+}
+
+/* Utility - input */
+.themed-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-color);
+  color: var(--text-primary);
+}

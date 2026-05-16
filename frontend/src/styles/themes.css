@@ -1,0 +1,444 @@
+/*
+  Theme tokens for JawSight
+  - Provides semantic CSS variables for Light (default :root) and Dark (.dark-theme)
+  - Do not change the brand color between themes (JawSight green)
+*/
+
+/* ---------- Semantic variable naming convention ----------
+--color-bg-app             : application background
+--color-bg-page            : page background (content area)
+--color-surface-card       : card surface / panel background
+--color-surface-elevated   : elevated surfaces like modals, popovers
+--color-modal-bg           : modal overlay background
+--color-navbar-bg          : navbar background
+--color-sidebar-bg         : sidebar background
+--color-table-header-bg    : table header background
+--color-table-row-bg       : table row background
+--color-hover-bg           : hover background for interactive rows
+
+--text-primary
+--text-secondary
+--text-muted
+--text-disabled
+--text-inverse
+--text-placeholder
+
+--brand-primary            : JawSight brand green (do not change)
+--brand-hover
+--brand-active
+--brand-subtle-bg
+--brand-focus-ring
+
+--border-primary
+--border-subtle
+--input-border
+--border-active
+--divider
+
+--btn-primary-bg
+--btn-primary-text
+--btn-primary-hover
+--btn-primary-active
+
+--success
+--warning
+--error
+--info
+
+--shadow-card
+--shadow-dropdown
+--shadow-modal
+--shadow-hover
+
+--scrollbar-track
+--scrollbar-thumb
+--scrollbar-thumb-hover
+
+*/
+
+:root {
+  /* Core */
+  --color-bg-app: #f5f7fa; /* app background */
+  --color-bg-page: #f8fafc; /* page content */
+  --color-surface-card: #ffffff; /* cards */
+  --color-surface-elevated: #ffffff; /* elevated surfaces */
+  --color-modal-bg: rgba(
+    15,
+    23,
+    42,
+    0.6
+  ); /* overlay for modals (light uses translucent dark) */
+  --color-navbar-bg: #ffffff;
+  --color-sidebar-bg: #f3f6f8;
+  --color-table-header-bg: #f1f5f9; /* subtle header */
+  --color-table-row-bg: #ffffff;
+  --color-hover-bg: rgba(15, 23, 42, 0.03);
+
+  /* Typography */
+  --text-primary: #1e293b; /* strong readable */
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-disabled: #a0aec0;
+  --text-inverse: #ffffff;
+  --text-placeholder: #9aa7b8;
+
+  /* Brand (JawSight) - DO NOT CHANGE BETWEEN THEMES */
+  --brand-primary: #63a361;
+  --brand-hover: #569956; /* slight darken for hover */
+  --brand-active: #4e824d;
+  --brand-subtle-bg: rgba(99, 163, 97, 0.08);
+  --brand-focus-ring: rgba(99, 163, 97, 0.28);
+
+  /* Borders */
+  --border-primary: #e2e8f0;
+  --border-subtle: #eef2f6;
+  --input-border: #e6edf3;
+  --border-active: #cbd5e1;
+  --divider: #e6eef6;
+
+  /* Buttons */
+  --btn-primary-bg: var(--brand-primary);
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: var(--brand-hover);
+  --btn-primary-active: var(--brand-active);
+  --btn-secondary-bg: #f1f5f9;
+  --btn-secondary-text: var(--text-primary);
+  --btn-destructive-bg: #fee2e2;
+  --btn-destructive-text: #b91c1c;
+
+  /* Form */
+  --input-bg: #ffffff;
+  --input-border-color: var(--input-border);
+  --input-focused-border: var(--brand-primary);
+  --input-invalid-border: #f43f5e;
+  --checkbox-checked: var(--brand-primary);
+
+  /* Table */
+  --table-bg: var(--color-table-row-bg);
+  --table-header-bg: var(--color-table-header-bg);
+  --table-row-hover: rgba(15, 23, 42, 0.04);
+  --table-selected-row: rgba(99, 163, 97, 0.06);
+  --table-alternate-row: #fbfcfd;
+  --table-divider: var(--divider);
+
+  /* Status */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #0ea5a4;
+
+  /* Shadows */
+  --shadow-card: 0 6px 18px rgba(2, 6, 23, 0.06);
+  --shadow-dropdown: 0 8px 30px rgba(2, 6, 23, 0.08);
+  --shadow-modal: 0 30px 80px rgba(2, 6, 23, 0.2);
+  --shadow-hover: 0 6px 18px rgba(2, 6, 23, 0.04);
+
+  /* Scrollbar */
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+}
+
+/* Dark theme variables - apply by adding .dark-theme on documentElement */
+.dark-theme {
+  --color-bg-app: #0b0b0b;
+  --color-bg-page: #0f0f0f;
+  --color-surface-card: #161616;
+  --color-surface-elevated: #1e1e1e;
+  --color-modal-bg: rgba(0, 0, 0, 0.6);
+  --color-navbar-bg: #111111;
+  --color-sidebar-bg: #111111;
+  --color-table-header-bg: #1a1a1a;
+  --color-table-row-bg: #0f0f0f;
+  --color-hover-bg: rgba(255, 255, 255, 0.03);
+
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --text-muted: #7a7a7a;
+  --text-disabled: #606060;
+  --text-inverse: #0b0b0b;
+  --text-placeholder: #8e8e8e;
+
+  /* Keep brand color identical (branding rule) */
+  --brand-primary: #63a361;
+  --brand-hover: #63a361;
+  --brand-active: #4e824d;
+  --brand-subtle-bg: rgba(99, 163, 97, 0.06);
+  --brand-focus-ring: rgba(99, 163, 97, 0.22);
+
+  --border-primary: #2a2a2a;
+  --border-subtle: #222222;
+  --input-border: #2a2a2a;
+  --border-active: #3a3a3a;
+  --divider: #222222;
+
+  --btn-primary-bg: var(--brand-primary);
+  --btn-primary-text: #0b0b0b;
+  --btn-primary-hover: #63a361;
+  --btn-primary-active: #4e824d;
+  --btn-secondary-bg: #161616;
+  --btn-secondary-text: #e6eef3;
+  --btn-destructive-bg: #2a0b0b;
+  --btn-destructive-text: #ffb6b6;
+
+  --input-bg: #121212;
+  --input-border-color: #2a2a2a;
+  --input-focused-border: var(--brand-primary);
+  --input-invalid-border: #ef4444;
+  --checkbox-checked: var(--brand-primary);
+
+  --table-bg: var(--color-table-row-bg);
+  --table-header-bg: var(--color-table-header-bg);
+  --table-row-hover: rgba(255, 255, 255, 0.02);
+  --table-selected-row: rgba(99, 163, 97, 0.06);
+  --table-alternate-row: #0b0b0b;
+  --table-divider: var(--divider);
+
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #06b6d4;
+
+  --shadow-card: 0 8px 30px rgba(2, 6, 23, 0.6);
+  --shadow-dropdown: 0 12px 40px rgba(2, 6, 23, 0.6);
+  --shadow-modal: 0 40px 120px rgba(2, 6, 23, 0.7);
+  --shadow-hover: 0 6px 18px rgba(2, 6, 23, 0.5);
+
+  --scrollbar-track: #0f0f0f;
+  --scrollbar-thumb: #2a2a2a;
+  --scrollbar-thumb-hover: #3a3a3a;
+}
+
+/* Utility mappings that components can adopt progressively */
+.bg-app {
+  background-color: var(--color-bg-app) !important;
+}
+.bg-page {
+  background-color: var(--color-bg-page) !important;
+}
+.surface-card {
+  background-color: var(--color-surface-card) !important;
+}
+.surface-elevated {
+  background-color: var(--color-surface-elevated) !important;
+}
+.navbar-bg {
+  background-color: var(--color-navbar-bg) !important;
+}
+.sidebar-bg {
+  background-color: var(--color-sidebar-bg) !important;
+}
+.table-header-bg {
+  background-color: var(--color-table-header-bg) !important;
+}
+.hover-bg {
+  background-color: var(--color-hover-bg) !important;
+}
+
+.text-primary {
+  color: var(--text-primary) !important;
+}
+.text-secondary {
+  color: var(--text-secondary) !important;
+}
+.text-muted {
+  color: var(--text-muted) !important;
+}
+.text-disabled {
+  color: var(--text-disabled) !important;
+}
+.text-placeholder {
+  color: var(--text-placeholder) !important;
+}
+.text-destructive {
+  color: var(--error) !important;
+}
+
+.border-primary {
+  border-color: var(--border-primary) !important;
+}
+.border-subtle {
+  border-color: var(--border-subtle) !important;
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+.btn-primary:hover {
+  background: var(--btn-primary-hover);
+}
+.btn-primary:active {
+  background: var(--btn-primary-active);
+}
+
+.card-shadow {
+  box-shadow: var(--shadow-card);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  background: var(--color-modal-bg) !important;
+}
+
+/* Branding helpers */
+.brand-text {
+  color: var(--brand-primary) !important;
+}
+.brand-subtle {
+  background: var(--brand-subtle-bg) !important;
+}
+
+/* Themed input */
+.themed-input {
+  background: var(--input-bg) !important;
+  border: 1px solid var(--input-border-color) !important;
+  color: var(--text-primary) !important;
+}
+.input-invalid {
+  border-color: var(--input-invalid-border) !important;
+  background: rgba(244, 63, 94, 0.06) !important;
+}
+.input-focus:focus {
+  box-shadow: 0 0 0 4px var(--brand-focus-ring) !important;
+  border-color: var(--input-focused-border) !important;
+}
+.disabled-input:disabled {
+  background: var(--color-table-row-bg) !important;
+  color: var(--text-disabled) !important;
+}
+
+/* scrollbar using variables */
+*::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* React-Toastify theming using tokens */
+.Toastify__toast-container {
+  font-family: inherit;
+}
+.Toastify__toast {
+  background: var(--color-surface-card) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: var(--shadow-dropdown) !important;
+}
+.Toastify__toast--success {
+  background: linear-gradient(
+    90deg,
+    var(--brand-subtle-bg),
+    var(--color-surface-card)
+  ) !important;
+  border-left: 4px solid var(--success) !important;
+}
+.Toastify__toast--error {
+  border-left: 4px solid var(--error) !important;
+}
+.Toastify__toast--warning {
+  border-left: 4px solid var(--warning) !important;
+}
+.Toastify__toast--info {
+  border-left: 4px solid var(--info) !important;
+}
+
+/* Toast close button hidden (global preference) */
+.Toastify__close-button {
+  display: none !important;
+}
+
+/* Status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 600;
+  line-height: 1;
+}
+.badge-success {
+  background: var(--success);
+  color: var(--text-inverse);
+}
+.badge-warning {
+  background: var(--warning);
+  color: var(--text-inverse);
+}
+.badge-error {
+  background: var(--error);
+  color: var(--text-inverse);
+}
+.badge-info {
+  background: var(--info);
+  color: var(--text-inverse);
+}
+.badge-neutral {
+  background: var(--table-header-bg);
+  color: var(--text-primary);
+}
+
+/* Compatibility layer: map common Tailwind color utility classes to tokens.
+  This lets existing components (using Tailwind utilities) respect the theme tokens
+  without requiring a full class rewrite. These rules intentionally use
+  high-specificity/important so they override compiled Tailwind color utilities.
+*/
+.bg-white {
+  background-color: var(--color-surface-card) !important;
+}
+.bg-slate-50 {
+  background-color: var(--color-bg-page) !important;
+}
+.bg-slate-900 {
+  background-color: var(--color-surface-elevated) !important;
+}
+.text-slate-900 {
+  color: var(--text-primary) !important;
+}
+.text-slate-800 {
+  color: var(--text-primary) !important;
+}
+.text-slate-700 {
+  color: var(--text-primary) !important;
+}
+.text-slate-500 {
+  color: var(--text-secondary) !important;
+}
+.text-slate-400 {
+  color: var(--text-muted) !important;
+}
+.text-white {
+  color: var(--text-inverse) !important;
+}
+.border-slate-200 {
+  border-color: var(--border-primary) !important;
+}
+.border-slate-100 {
+  border-color: var(--border-subtle) !important;
+}
+.border-slate-300 {
+  border-color: var(--border-active) !important;
+}
+.hover\:bg-slate-200:hover {
+  background-color: var(--color-hover-bg) !important;
+}
+.hover\:bg-slate-700:hover {
+  background-color: var(--color-hover-bg) !important;
+}
+.shadow-sm {
+  box-shadow: var(--shadow-hover) !important;
+}
+.shadow-lg {
+  box-shadow: var(--shadow-dropdown) !important;
+}
