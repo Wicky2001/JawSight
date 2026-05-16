@@ -62,6 +62,9 @@ export const api = {
   post: (endpoint: string, body?: any, config?: any) =>
     client.post(endpoint, body, config),
 
+  put: (endpoint: string, body?: any, config?: any) =>
+    client.put(endpoint, body, config),
+
   patch: (endpoint: string, body?: any, config?: any) =>
     client.patch(endpoint, body, config),
 

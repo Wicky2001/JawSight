@@ -1,19 +1,25 @@
 {
   "compilerOptions": {
-    "target": "ES2022",                /* Modern JavaScript for 2026 */
-    "module": "NodeNext",              /* Best for modern Node.js */
+    "target": "ES2022" /* Modern JavaScript for 2026 */,
+    "module": "NodeNext" /* Best for modern Node.js */,
     "moduleResolution": "NodeNext",
     "paths": {
-      "@shared/*": ["../shared/src/*"] /* The bridge to your shared research schemas */
+      "@shared/*": [
+        "../shared/src/*"
+      ] /* The bridge to your shared research schemas */
     },
     "typeRoots": ["./node_modules/@types", "./src/helpers/types"],
-    "outDir": "./dist",                /* Where the compiled code goes */
+    "outDir": "./dist" /* Where the compiled code goes */,
     "rootDir": "..",
-    "strict": true,                    /* Critical for research accuracy */
+    "strict": true /* Critical for research accuracy */,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true
   },
-  "include": ["src", "../shared/src/**/*", "../shared/types/inferenceHistory.types.ts"] /* Tell TS to look in both folders */
+  "include": [
+    "src",
+    "../shared/src/**/*",
+    "../shared/types/**/*"
+  ] /* Tell TS to look in both folders */
 }

@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Inference from "./pages/inference/Inference";
 import InferenceHistory from "./pages/inferenceHistory/InferenceHistory";
 import InferenceHistoryDetailView from "./pages/inferenceHistory/inferenceHistoryDetailView/InferenceHistoryDetailView";
+import Patients from "./pages/patients/Patients";
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./helpers/ProtectedRoute";
@@ -40,6 +41,12 @@ function App() {
               History
             </Link>
             <Link
+              to="/patients"
+              className={`${location.pathname === "/patients" ? "text-teal-600 border-b-2 border-teal-600" : "hover:text-slate-800 transition-colors"} pb-1`}
+            >
+              Patients
+            </Link>
+            <Link
               to="#"
               className="hover:text-slate-800 transition-colors pb-1"
             >
@@ -62,6 +69,7 @@ function App() {
               path="/inference-history-detail-view/:patient_id/:patient_name/:inference_id"
               element={<InferenceHistoryDetailView />}
             />
+            <Route path="/patients" element={<Patients />} />
           </Route>
         </Routes>
       </main>

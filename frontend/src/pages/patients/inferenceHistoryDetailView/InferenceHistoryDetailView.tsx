@@ -111,6 +111,8 @@ const InferenceHistoryDetailView = () => {
           Icon={ClipboardClock}
         />
 
+        <button onClick={handleRegenerateUrls}>Click me</button>
+
         <div className="flex-1 mt-6 flex flex-col">
           {/* Loading State */}
           {loading && !signUrls ? (
