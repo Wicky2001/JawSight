@@ -5,7 +5,7 @@ interface ImageCardProps {
   url?: string | null;
 }
 
-const ResultImageCard = ({ title, url }: ImageCardProps) => {
+const ImageCard = ({ title, url }: ImageCardProps) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[400px]">
       <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
@@ -33,7 +33,6 @@ const ResultImageCard = ({ title, url }: ImageCardProps) => {
           />
         ) : null}
 
-        {/* Fallback for missing or expired images */}
         <div
           className={`absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-100 ${url ? "hidden" : "flex"}`}
         >
@@ -47,4 +46,4 @@ const ResultImageCard = ({ title, url }: ImageCardProps) => {
   );
 };
 
-export default ResultImageCard;
+export default ImageCard;

@@ -18,6 +18,7 @@ const placeholders: PatientsRowType[] = Array.from(
     name: `Patient ${index + 1}`,
     age: String(20 + (index % 60)),
     email: `patient${index + 1}@hospital.com`,
+    gender: index % 2 === 0 ? "MALE" : "FEMALE",
     createdAt: new Date(
       Date.now() - (index + 1) * 86400000,
     ).toLocaleDateString(),
@@ -89,6 +90,7 @@ export const createPatient = async (
       name: data.name,
       age: String(data.age),
       email: data.email,
+      gender: data.gender,
       createdAt: new Date().toLocaleDateString(),
     };
     placeholders.unshift(newPatient);
@@ -116,7 +118,8 @@ export const updatePatient = async (
         ...placeholders[index],
         name: data.name,
         age: String(data.age),
-        email: data.email,
+          email: data.email,
+          gender: data.gender,
       };
       return placeholders[index];
     }

@@ -1,51 +1,56 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('patients', {
+    await queryInterface.createTable("patients", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.BIGINT
+        type: Sequelize.BIGINT,
       },
       doctor_id: {
         type: Sequelize.BIGINT,
         allowNull: false,
         references: {
-          model: 'doctors',
-          key: 'id'
+          model: "doctors",
+          key: "id",
         },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT",
       },
       name: {
         type: Sequelize.STRING(255),
-        allowNull: false
+        allowNull: false,
       },
       age: {
         type: Sequelize.INTEGER,
-        allowNull: false
+        allowNull: false,
       },
       email: {
-        type: Sequelize.STRING(255)
+        type: Sequelize.STRING(255),
+      },
+      gender: {
+        type: Sequelize.ENUM("MALE", "FEMALE"),
+        allowNull: false,
+        defaultValue: "MALE",
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       deletedAt: {
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('patients');
-  }
+    await queryInterface.dropTable("patients");
+  },
 };

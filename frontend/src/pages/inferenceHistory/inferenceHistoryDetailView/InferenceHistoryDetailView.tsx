@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toastHelper } from "../../../helpers/toastHelper";
 import { useParams } from "react-router-dom";
 import PageHeader from "../../../helpers/ui/PageHeader";
 import ImageCard from "./ImageCard";
@@ -71,7 +71,9 @@ const InferenceHistoryDetailView = () => {
         }
 
         console.error("Failed to fetch inference history detail", error);
-        toast.error("Failed to load inference details. Please try again.");
+        toastHelper.error(
+          "Failed to load inference details. Please try again.",
+        );
       } finally {
         if (request_id === requestId.current) {
           setLoading(false);
@@ -97,7 +99,7 @@ const InferenceHistoryDetailView = () => {
   const handleRegenerateUrls = (): void => {
     setRegenerating(true);
     setRefreshTrigger((prev) => prev + 1);
-    toast.warn(
+    toastHelper.warning(
       "Secure image URLs are being regenerated for another 30 minutes.",
     );
   };

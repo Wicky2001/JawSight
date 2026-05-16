@@ -1,16 +1,19 @@
 import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Table } from "../../helpers/ui/TableComponent";
 import type { ColumnDef } from "../../helpers/ui/TableComponent";
 import PageHeader from "../../helpers/ui/PageHeader";
 import SideBar from "../../helpers/ui/SideBar";
 import { Users } from "lucide-react";
-import { toast } from "react-toastify";
+import { toastHelper } from "../../helpers/toastHelper";
 import { usePatients } from "./UsePatients";
 import type { PatientsRowType } from "../../../../shared/types/Patients/Patients.types";
+import type { PatientsDetailViewPatientInfoType } from "../../../../shared/types/Patients/PatientsDetailView/PatientsDetailView.types";
 import PatientForm from "./PatientForm";
 import { deletePatient } from "./Patients.service";
 
 const Patients = () => {
+  const navigate = useNavigate();
   const {
     loading,
     rows,
@@ -47,6 +50,12 @@ const Patients = () => {
       sortable: false,
     },
     {
+      headerName: "Gender",
+      field: "gender",
+      width: 120,
+      sortable: true,
+    },
+    {
       headerName: "Created",
       field: "createdAt",
       width: 180,
@@ -64,6 +73,14 @@ const Patients = () => {
     setIsSideBarVisible(true);
   }, []);
 
+  const handleRowClick = useCallback((patient: PatientsRowType) => {
+    navigate("/patients-detail-view", {
+      state: {
+        patient: patient as PatientsDetailViewPatientInfoType,
+      },
+    });
+  }, []);
+
   const onCloseSideBar = useCallback(() => {
     setIsSideBarVisible(false);
     setEditingPatient(undefined);
@@ -77,11 +94,11 @@ const Patients = () => {
 
       try {
         await deletePatient(patientId);
-        toast.success("Patient deleted successfully");
+        toastHelper.success("Patient deleted successfully");
         refreshPatients();
       } catch (error) {
         console.error("Failed to delete patient", error);
-        toast.error("Failed to delete patient. Please try again.");
+        toastHelper.error("Failed to delete patient. Please try again.");
       }
     },
     [refreshPatients],
@@ -111,6 +128,8 @@ const Patients = () => {
             onSearchChange={handleSearchChange}
             onLoadMoreRecords={handleLoadMore}
             onSortChange={handleSortChange}
+            clickable={true}
+            onRowClick={handleRowClick}
             onEdit={handleEditClick}
             onAdd={handleAddClick}
             onDelete={(ids) => {

@@ -14,6 +14,8 @@ import {
   deletePatientSchema,
 } from "./patient.validation.js";
 
+import patientDetailViewRouter from "./PatientDetailView/PatientDetailView.route.js";
+
 const router = Router();
 
 router
@@ -22,5 +24,7 @@ router
   .post(auth, validate(createPatientSchema), createPatientController)
   .put(auth, validate(updatePatientSchema), updatePatientController)
   .delete(auth, validate(deletePatientSchema), deletePatientController);
+
+router.use("/detail-view", patientDetailViewRouter);
 
 export default router;

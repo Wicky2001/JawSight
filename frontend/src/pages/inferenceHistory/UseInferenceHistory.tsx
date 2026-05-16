@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toastHelper } from "../../helpers/toastHelper";
 import { fetchInferenceHistory } from "./InferenceHistory.service";
 import type {
   GetInferenceHistoryResponseType,
@@ -76,7 +76,7 @@ export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
       }
 
       console.error("Failed to fetch inference history", error);
-      toast.error("Failed to load inference history. Please try again.");
+      toastHelper.error("Failed to load inference history. Please try again.");
     } finally {
       if (requestId === requestIdRef.current) {
         setLoading(false);

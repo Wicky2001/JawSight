@@ -16,6 +16,7 @@ export const createPatientSchema = {
     name: z.string().trim().min(1, "Name is required"),
     age: z.number().int().min(0, "Age must be a positive number"),
     email: z.string().email("Valid email is required"),
+    gender: z.enum(["MALE", "FEMALE"]),
   }),
 };
 
@@ -25,6 +26,7 @@ export const updatePatientSchema = {
     name: z.string().trim().min(1, "Name is required"),
     age: z.number().int().min(0, "Age must be a positive number"),
     email: z.string().email("Valid email is required"),
+    gender: z.enum(["MALE", "FEMALE"]),
   }),
 };
 

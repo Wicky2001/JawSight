@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toastHelper } from "../../helpers/toastHelper";
 import { fetchPatients } from "./Patients.service";
 import type {
   GetPatientsResponseType,
@@ -79,7 +79,7 @@ export const usePatients = (initialLimit = DEFAULT_LIMIT) => {
       }
 
       console.error("Failed to fetch patients", error);
-      toast.error("Failed to load patients. Please try again.");
+      toastHelper.error("Failed to load patients. Please try again.");
     } finally {
       if (requestId === requestIdRef.current) {
         setLoading(false);

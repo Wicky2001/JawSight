@@ -41,6 +41,7 @@ export const getPatients = async (
         name: row.name,
         age: String(row.age),
         email: row.email,
+        gender: row.gender as "MALE" | "FEMALE",
         createdAt: new Date(row.createdAt).toLocaleString(),
       };
       return formattedRow;
@@ -74,6 +75,7 @@ export const createPatient = async (
           name: data.name,
           age: data.age,
           email: data.email,
+          gender: data.gender,
         },
         { transaction: t },
       );
@@ -86,6 +88,7 @@ export const createPatient = async (
       name: newPatient.name,
       age: String(newPatient.age),
       email: newPatient.email,
+      gender: newPatient.gender as "MALE" | "FEMALE",
       createdAt: new Date(newPatient.createdAt).toLocaleString(),
     };
   } catch (error: any) {
@@ -124,6 +127,7 @@ export const updatePatient = async (
           name: data.name,
           age: data.age,
           email: data.email,
+          gender: data.gender,
         },
         { transaction: t },
       );
@@ -136,6 +140,7 @@ export const updatePatient = async (
       name: updatedPatient.name,
       age: String(updatedPatient.age),
       email: updatedPatient.email,
+      gender: updatedPatient.gender as "MALE" | "FEMALE",
       createdAt: new Date(updatedPatient.createdAt).toLocaleString(),
     };
   } catch (error: any) {

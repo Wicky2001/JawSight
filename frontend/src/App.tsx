@@ -8,6 +8,7 @@ import Inference from "./pages/inference/Inference";
 import InferenceHistory from "./pages/inferenceHistory/InferenceHistory";
 import InferenceHistoryDetailView from "./pages/inferenceHistory/inferenceHistoryDetailView/InferenceHistoryDetailView";
 import Patients from "./pages/patients/Patients";
+import PatientsDetailView from "./pages/patients/PatientsDetailView/PatientsDetailView";
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./helpers/ProtectedRoute";
@@ -69,6 +70,10 @@ function App() {
               path="/inference-history-detail-view/:patient_id/:patient_name/:inference_id"
               element={<InferenceHistoryDetailView />}
             />
+            <Route
+              path="/patients-detail-view"
+              element={<PatientsDetailView />}
+            />
             <Route path="/patients" element={<Patients />} />
           </Route>
         </Routes>
@@ -79,6 +84,7 @@ function App() {
         autoClose={4000}
         newestOnTop
         pauseOnHover
+        theme="colored"
       />
     </div>
   );

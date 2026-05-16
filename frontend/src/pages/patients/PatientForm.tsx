@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import { toastHelper } from "../../helpers/toastHelper";
 import { createPatient, updatePatient } from "./Patients.service";
 import {
   createPatientFormSchema,
@@ -27,6 +27,7 @@ const PatientForm = ({
     name: "",
     age: "",
     email: "",
+    gender: "MALE",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -36,9 +37,10 @@ const PatientForm = ({
         name: patchData.name,
         age: patchData.age,
         email: patchData.email,
+        gender: patchData.gender ?? "MALE",
       });
     } else {
-      setFormData({ name: "", age: "", email: "" });
+      setFormData({ name: "", age: "", email: "", gender: "MALE" });
     }
     setErrors({});
   }, [patchData]);
@@ -49,6 +51,7 @@ const PatientForm = ({
       name: formData.name,
       age: formData.age ? parseInt(formData.age) : undefined,
       email: formData.email,
+      gender: formData.gender,
     });
 
     if (!result.success) {
@@ -92,6 +95,7 @@ const PatientForm = ({
         name: formData.name.trim(),
         age: parseInt(formData.age),
         email: formData.email.trim(),
+        gender: formData.gender as "MALE" | "FEMALE",
       };
 
       if (isEdit && patchData) {
@@ -100,24 +104,26 @@ const PatientForm = ({
           name: submitData.name,
           age: submitData.age,
           email: submitData.email,
+          gender: submitData.gender,
         });
-        toast.success("Patient updated successfully");
+        toastHelper.success("Patient updated successfully");
       } else {
         await createPatient({
           name: submitData.name,
           age: submitData.age,
           email: submitData.email,
+          gender: submitData.gender,
         });
-        toast.success("Patient created successfully");
+        toastHelper.success("Patient created successfully");
       }
 
       refreshTable?.();
       closeSideBar?.();
-      setFormData({ name: "", age: "", email: "" });
+      setFormData({ name: "", age: "", email: "", gender: "MALE" });
       setErrors({});
     } catch (error) {
       console.error("Form submission error:", error);
-      toast.error("Failed to save patient. Please try again.");
+      toastHelper.error("Failed to save patient. Please try again.");
     }
   };
 
@@ -196,6 +202,34 @@ const PatientForm = ({
         {errors.email && (
           <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
             <span>•</span> {errors.email}
+          </p>
+        )}
+      </div>
+
+      {/* Gender Field */}
+      <div>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">
+          Gender <span className="text-red-500">*</span>
+        </label>
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, gender: e.target.value }))
+          }
+          disabled={isLoading}
+          className={`w-full px-4 py-2.5 text-sm border rounded-lg transition-all focus:outline-none focus:ring-2 ${
+            errors.gender
+              ? "border-red-300 bg-red-50 focus:ring-red-500/30 focus:border-red-400"
+              : "border-slate-300 bg-white hover:border-slate-400 focus:ring-teal-500/30 focus:border-teal-500"
+          } disabled:bg-slate-50 disabled:text-slate-500`}
+        >
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+        </select>
+        {errors.gender && (
+          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+            <span>•</span> {errors.gender}
           </p>
         )}
       </div>

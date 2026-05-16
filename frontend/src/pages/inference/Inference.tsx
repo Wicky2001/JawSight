@@ -9,7 +9,7 @@ import {
 import { api } from "../../helpers/apiClient/apiClient";
 import { dataURLtoFile } from "../../helpers/utils";
 import { InfoCallout } from "../../helpers/ui/InfoCallout";
-import { toast } from "react-toastify";
+import { toastHelper } from "../../helpers/toastHelper";
 import { UploadZone } from "./UploadZone";
 import { LandmarkModal } from "./LandmarkModal";
 import { useSocket } from "../../context/SocketContext";
@@ -61,7 +61,7 @@ const Inference = () => {
     setCsvData(csvString);
     setSavedPointsArray(rawPoints);
     setShowLandmarkModal(false);
-    toast.success("front.csv generated successfully!");
+    toastHelper.success("front.csv generated successfully!");
   };
 
   const isReadyToSubmit =
@@ -93,10 +93,10 @@ const Inference = () => {
       const response = await api.post("/inference", formData);
 
       console.log("Server Response:", response.data);
-      toast.success("Inference data successfully submitted!");
+      toastHelper.success("Inference data successfully submitted!");
     } catch (error: any) {
       console.error("Submission failed:", error);
-      toast.error(
+      toastHelper.error(
         error.response?.data?.message ||
           "Failed to submit data. Please try again.",
       );
@@ -147,7 +147,7 @@ const Inference = () => {
                   bgImage="/leftUploadPlaceHolder.png"
                   onUpload={handleUpload}
                   onRemove={handleRemove}
-                  onError={(message) => toast.error(message)}
+                  onError={(message) => toastHelper.error(message)}
                 />
                 <UploadZone
                   id="right"
@@ -157,7 +157,7 @@ const Inference = () => {
                   bgImage="/rightUploadPlaceHolder.png"
                   onUpload={handleUpload}
                   onRemove={handleRemove}
-                  onError={(message) => toast.error(message)}
+                  onError={(message) => toastHelper.error(message)}
                 />
               </div>
 
@@ -199,7 +199,7 @@ const Inference = () => {
                   hasCsv={!!csvData}
                   onUpload={handleUpload}
                   onRemove={handleRemove}
-                  onError={(message) => toast.error(message)}
+                  onError={(message) => toastHelper.error(message)}
                   onEditMarks={() => setShowLandmarkModal(true)}
                 />
               </div>

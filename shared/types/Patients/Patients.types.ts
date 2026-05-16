@@ -23,6 +23,7 @@ export type PatientsRowType = {
   name: string;
   age: string;
   email: string;
+  gender: "MALE" | "FEMALE";
   createdAt: string;
 };
 
@@ -35,6 +36,7 @@ export type CreatePatientRequestType = {
   name: string;
   age: number;
   email: string;
+  gender: "MALE" | "FEMALE";
 };
 
 export type UpdatePatientRequestType = {
@@ -42,6 +44,7 @@ export type UpdatePatientRequestType = {
   name: string;
   age: number;
   email: string;
+  gender: "MALE" | "FEMALE";
 };
 
 export type DeletePatientRequestType = {
@@ -63,6 +66,7 @@ export const createPatientFormSchema = z.object({
     .min(1, "Age must be greater than 0")
     .max(150, "Age must be less than 150"),
   email: z.string().trim().email("Please enter a valid email"),
+  gender: z.enum(["MALE", "FEMALE"]),
 });
 
 export const updatePatientFormSchema = createPatientFormSchema;

@@ -236,7 +236,10 @@ export const Table = <T extends Record<string, any>>({
                     </td>
                   ))}
                   {(showDelete || showEdit) && (
-                    <td className="p-4 flex flex-row justify-center align-center">
+                    <td
+                      className="p-4 flex flex-row justify-center align-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <Menu>
                         <MenuButton className="flex justify-center items-center px-2 py-1 text-black rounded transition-colors cursor-pointer hover:bg-slate-200">
                           <Ellipsis size={15} />
