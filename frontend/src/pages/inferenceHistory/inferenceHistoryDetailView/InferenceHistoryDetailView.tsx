@@ -1,22 +1,28 @@
 import { useEffect, useCallback, useRef, useState } from "react";
 import axios from "axios";
-import { Toast } from "../../../helpers/ui/Toast";
+import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import PageHeader from "../../../helpers/ui/PageHeader";
 import ImageCard from "./ImageCard";
 import { ClipboardClock, ShieldAlert, RefreshCw, Loader2 } from "lucide-react";
 import { api } from "../../../helpers/apiClient/apiClient";
+import type {
+  InferenceDetailViewResponseType,
+  InferenceDetailViewRequestType,
+} from ",,/../../shared/types/InferenceHistory/InferenceHistoryDetailView/InferenceDetalView.types";
 
-const INFERENCE_DETAIL_API_URL = "/inference/history/detail";
+const INFERENCE_DETAIL_VIEW_API_URL = "/inference-history/detail-view";
 
 const InferenceHistoryDetailView = () => {
   const { patient_id, patient_name, inference_id } = useParams();
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [regenerating, setRegenerating] = useState<boolean>(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const requestId = useRef(0);
 
-  const [inferenceDetail, setInferenceDetail] = useState<any>(null);
+  const [signUrls, setSignUrls] =
+    useState<InferenceDetailViewResponseType | null>(null);
 
   const cancelPendingRequest = useCallback(() => {
     debugger;
@@ -25,7 +31,9 @@ const InferenceHistoryDetailView = () => {
   }, []);
 
   const getInferenceHistoryDetail = useCallback(
-    async (patient_id: number, inference_id: string) => {
+    async ({ patient_id, inference_id }: InferenceDetailViewRequestType) => {
+      const request_id = ++requestId.current;
+      debugger;
       try {
         cancelPendingRequest();
 
@@ -38,26 +46,36 @@ const InferenceHistoryDetailView = () => {
           patient_id: patient_id,
         };
 
+        const response = await api.get(
+          INFERENCE_DETAIL_VIEW_API_URL,
+          queryParams,
+          {
+            signal: controller.signal,
+          },
+        );
+
+        debugger;
+        if (request_id !== requestId.current) {
+          return;
+        }
         debugger;
 
-        const response = await api.get(INFERENCE_DETAIL_API_URL, queryParams, {
-          signal: controller.signal,
-        });
+        const signUrls = response.data as InferenceDetailViewResponseType;
 
-        setInferenceDetail(response.data);
+        setSignUrls(signUrls);
       } catch (error) {
         if (axios.isCancel(error)) {
+          debugger;
+          console.log(request_id);
           return;
         }
 
         console.error("Failed to fetch inference history detail", error);
-        Toast({
-          message: "Failed to load inference details. Please try again.",
-          error: true,
-          onClose: () => {},
-        });
+        toast.error("Failed to load inference details. Please try again.");
       } finally {
-        setLoading(false);
+        if (request_id === requestId.current) {
+          setLoading(false);
+        }
       }
     },
     [],
@@ -65,7 +83,10 @@ const InferenceHistoryDetailView = () => {
 
   useEffect(() => {
     debugger;
-    getInferenceHistoryDetail(Number(patient_id), String(inference_id));
+    getInferenceHistoryDetail({
+      patient_id: Number(patient_id),
+      inference_id: String(inference_id),
+    });
 
     return () => {
       debugger;
@@ -76,13 +97,9 @@ const InferenceHistoryDetailView = () => {
   const handleRegenerateUrls = (): void => {
     setRegenerating(true);
     setRefreshTrigger((prev) => prev + 1);
-
-    Toast({
-      message:
-        "Secure image URLs regenerated successfully for another 30 minutes.",
-      error: false,
-      onClose: () => {},
-    });
+    toast.warn(
+      "Secure image URLs are being regenerated for another 30 minutes.",
+    );
   };
 
   return (
@@ -94,22 +111,33 @@ const InferenceHistoryDetailView = () => {
           Icon={ClipboardClock}
         />
 
+        <button onClick={handleRegenerateUrls}>Click me</button>
+
         <div className="flex-1 mt-6 flex flex-col">
           {/* Loading State */}
-          {loading && !inferenceDetail ? (
+          {loading && !signUrls ? (
             <div className="flex-1 flex flex-col items-center justify-center text-teal-600">
               <Loader2 className="w-10 h-10 animate-spin mb-4" />
               <p className="text-slate-600 font-medium animate-pulse">
                 Loading patient results...
               </p>
             </div>
-          ) : inferenceDetail ? (
+          ) : signUrls ? (
             <div className="flex flex-col gap-8 pb-10">
               {/* Images Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <ImageCard title="Left Profile" url={inferenceDetail.left} />
-                <ImageCard title="Front Face" url={inferenceDetail.front} />
-                <ImageCard title="Right Profile" url={inferenceDetail.right} />
+                <ImageCard
+                  title="Left Profile"
+                  url={signUrls.left_sign_image_url}
+                />
+                <ImageCard
+                  title="Front Face"
+                  url={signUrls.front_sign_image_url}
+                />
+                <ImageCard
+                  title="Right Profile"
+                  url={signUrls.right_sign_image_url}
+                />
               </div>
 
               {/* Security Warning & Regeneration Action */}

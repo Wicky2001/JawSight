@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { fetchInferenceHistory } from "./InferenceHistory.service";
 import type {
   GetInferenceHistoryResponseType,
   InferenceHistoryRowType,
-} from "../../../../shared/types/inferenceHistory.types.js";
-import { Toast } from "../../helpers/ui/Toast.js";
+} from "../../../../shared/types/InferenceHistory/InferenceHistory.types.js";
 
 const DEFAULT_LIMIT = 50;
 
@@ -76,11 +76,7 @@ export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
       }
 
       console.error("Failed to fetch inference history", error);
-      Toast({
-        message: "Failed to load inference history. Please try again.",
-        error: true,
-        onClose: () => {},
-      });
+      toast.error("Failed to load inference history. Please try again.");
     } finally {
       if (requestId === requestIdRef.current) {
         setLoading(false);

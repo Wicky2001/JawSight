@@ -14,6 +14,8 @@ export const errorConverter = (
     error = new ApiError(
       (err as any)?.statusCode || httpStatus.INTERNAL_SERVER_ERROR,
       (err as any)?.message || "Internal Server Error",
+      undefined,
+      err,
     );
   }
 
@@ -40,14 +42,31 @@ export const errorHandler = (
   console.error(`🔗 Route: ${req.method} ${req.originalUrl}`);
   console.error(`🖥️  IP Address: ${req.ip}`);
   console.error("-".repeat(80));
-  console.error("📋 Stack Trace:");
-  console.error(errorStack);
+  console.error("📋 Stack Traces:");
+
+  const originalErr =
+    (err as any)?.original_error ||
+    (err as any)?.cause ||
+    (err as any)?.originalError;
+  const originalStack = originalErr?.stack;
+  const manualStack = errorStack;
+
+  if (originalStack) {
+    console.error("\n--- Original (internal) Error Stack ---\n");
+    console.error(originalStack);
+    console.error("\n--- End Original Error Stack ---\n");
+  }
+
+  console.error("\n--- ApiError / Thrown Error Stack ---\n");
+  console.error(manualStack || "<no stack available>");
+  console.error("\n--- End ApiError Stack ---\n");
+
   console.error("=".repeat(80) + "\n");
 
   res.status(statusCode).json({
     success: false,
     message: errorMessage,
-    errors: (err as any)?.errors || undefined,
+    validationErrors: (err as any)?.validationErrors || undefined,
   });
 };
 

@@ -1,10 +1,12 @@
-import { Route, Routes, Link, useLocation, Navigate } from "react-router-dom";
+import { Route, Routes, Link, useLocation } from "react-router-dom";
 import { Activity } from "lucide-react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // pages
 import Inference from "./pages/inference/Inference";
 import InferenceHistory from "./pages/inferenceHistory/InferenceHistory";
-import InferenceHistoryDetailView from "./pages/inferenceHistory/inferenceHistoryDetailView/inferenceHisoryDetailView";
+import InferenceHistoryDetailView from "./pages/inferenceHistory/inferenceHistoryDetailView/InferenceHistoryDetailView";
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "./helpers/ProtectedRoute";
@@ -63,6 +65,13 @@ function App() {
           </Route>
         </Routes>
       </main>
+
+      <ToastContainer
+        position="bottom-right"
+        autoClose={4000}
+        newestOnTop
+        pauseOnHover
+      />
     </div>
   );
 }

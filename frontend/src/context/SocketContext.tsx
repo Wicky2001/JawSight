@@ -1,8 +1,16 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import type { ReactNode } from "react";
-import { io, Socket } from 'socket.io-client';
-import { useAuth } from './AuthContext';
-import { Toast } from '../helpers/ui/Toast';
+import { io, Socket } from "socket.io-client";
+import { toast } from "react-toastify";
+import { useAuth } from "./AuthContext";
+import { api } from "../helpers/apiClient/apiClient";
 
 type SocketContextType = {
   socket: Socket | null;
@@ -16,7 +24,46 @@ const SocketContext = createContext<SocketContextType>({
   clearPrediction: () => {},
 });
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+const parseBool = (v: string | undefined, defaultVal: boolean) =>
+  v === undefined ? defaultVal : v === "true";
+const parseNumber = (v: string | undefined, defaultVal: number) => {
+  if (v === undefined) return defaultVal;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : defaultVal;
+};
+
+const SOCKET_AUTO_CONNECT = parseBool(
+  import.meta.env.VITE_SOCKET_AUTO_CONNECT,
+  false,
+);
+const SOCKET_WITH_CREDENTIALS = parseBool(
+  import.meta.env.VITE_SOCKET_WITH_CREDENTIALS,
+  true,
+);
+const SOCKET_RECONNECTION = parseBool(
+  import.meta.env.VITE_SOCKET_RECONNECTION,
+  true,
+);
+const SOCKET_RECONNECTION_ATTEMPTS = (() => {
+  const v = import.meta.env.VITE_SOCKET_RECONNECTION_ATTEMPTS;
+  if (v === undefined) return Infinity;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : Infinity;
+})();
+const SOCKET_RECONNECTION_DELAY = parseNumber(
+  import.meta.env.VITE_SOCKET_RECONNECTION_DELAY_MS,
+  1000,
+);
+const SOCKET_RECONNECTION_DELAY_MAX = parseNumber(
+  import.meta.env.VITE_SOCKET_RECONNECTION_DELAY_MAX_MS,
+  5000,
+);
+const SOCKET_TIMEOUT = parseNumber(
+  import.meta.env.VITE_SOCKET_TIMEOUT_MS,
+  5 * 60 * 1000,
+);
 
 type Props = {
   children: ReactNode;
@@ -24,60 +71,104 @@ type Props = {
 
 export const SocketProvider = ({ children }: Props) => {
   const { user, isAuthenticated } = useAuth();
-  const [socket, setSocket] = useState<Socket | null>(null); 
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [latestPrediction, setLatestPrediction] = useState<any | null>(null);
-  const [toastMsg, setToastMsg] = useState('');
-  
+  const socketRef = useRef<Socket | null>(null);
+  const refreshingRef = useRef(false);
+
   useEffect(() => {
-    if (!isAuthenticated || !user) return;   
+    if (!isAuthenticated || !user) {
+      socketRef.current?.removeAllListeners();
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+      setSocket(null);
+      return;
+    }
 
-    const newSocket = io(BACKEND_URL, {
-        autoConnect: true,
-        withCredentials: true,
+    if (socketRef.current) {
+      setSocket(socketRef.current);
+      if (!socketRef.current.connected) {
+        socketRef.current.connect();
+      }
+      return;
+    }
+
+    const socket = io(BACKEND_URL, {
+      autoConnect: SOCKET_AUTO_CONNECT,
+      withCredentials: SOCKET_WITH_CREDENTIALS,
+      reconnection: SOCKET_RECONNECTION,
+      reconnectionAttempts: SOCKET_RECONNECTION_ATTEMPTS,
+      reconnectionDelay: SOCKET_RECONNECTION_DELAY,
+      reconnectionDelayMax: SOCKET_RECONNECTION_DELAY_MAX,
+      timeout: SOCKET_TIMEOUT,
     });
 
-    setSocket(newSocket);
+    socketRef.current = socket;
+    setSocket(socket);
 
-    newSocket.on("connect", () => {
-      console.log("Connected to Socket.IO server with ID:", newSocket.id);
+    socket.on("connect", () => {
+      console.log("Connected to Socket.IO server with ID:", socket.id);
     });
 
-    newSocket.on("connect_error", (err) => {
+    socket.on("connect_error", async (err) => {
       console.error("Connection error:", err);
-    });
 
-    newSocket.on("prediction_complete", (data: any) => {
-      console.log("Global Socket received prediction_complete:", data);
-      setLatestPrediction(data);
-      if (data.status === 'success') {
-        setToastMsg('Prediction completed successfully!');
-      } else {
-        setToastMsg(data.message || 'An error occurred during prediction.');
+      const message = String((err as Error)?.message || "").toLowerCase();
+      if (refreshingRef.current || !message.includes("authentication error")) {
+        return;
+      }
+
+      refreshingRef.current = true;
+      try {
+        await api.post("/auth/refresh");
+        if (!socket.connected) {
+          socket.connect();
+        }
+      } catch (refreshError) {
+        console.error("Socket auth refresh failed:", refreshError);
+      } finally {
+        refreshingRef.current = false;
       }
     });
 
-    newSocket.on("disconnect", (reason) => {
+    socket.on("prediction_complete", (data: any) => {
+      console.log("Global Socket received prediction_complete:", data);
+      setLatestPrediction(data);
+      if (data.status === "success") {
+        toast.success("Prediction completed successfully!");
+      } else {
+        toast.error(data.message || "An error occurred during prediction.");
+      }
+    });
+
+    socket.on("disconnect", (reason) => {
       console.log("Disconnected from Socket.IO server. Reason:", reason);
     });
 
+    socket.connect();
+
     return () => {
-      debugger;
-      newSocket.disconnect();
+      socket.removeAllListeners();
+      socket.disconnect();
+      if (socketRef.current === socket) {
+        socketRef.current = null;
+      }
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const clearPrediction = useCallback(() => {
     setLatestPrediction(null);
   }, []);
 
   return (
-    <SocketContext.Provider value={{ socket, latestPrediction, clearPrediction }}>
-      <Toast message={toastMsg} onClose={() => setToastMsg('')} />
+    <SocketContext.Provider
+      value={{ socket, latestPrediction, clearPrediction }}
+    >
       {children}
     </SocketContext.Provider>
   );
 };
 
-export const useSocket = () => { 
-    return useContext(SocketContext);
+export const useSocket = () => {
+  return useContext(SocketContext);
 };

@@ -3,7 +3,7 @@ import type { ColumnDef } from "../../helpers/ui/TableComponent";
 import PageHeader from "../../helpers/ui/PageHeader";
 import { History } from "lucide-react";
 import { useInferenceHistory } from "./UseInferenceHistory";
-import type { InferenceHistoryRowType } from "../../../../shared/types/inferenceHistory.types";
+import type { InferenceHistoryRowType } from "../../../../shared/types/InferenceHistory/InferenceHistory.types";
 import { useNavigate } from "react-router-dom";
 
 const InferenceHistory = () => {

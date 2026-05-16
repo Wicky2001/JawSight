@@ -31,8 +31,8 @@ const validate =
           errors[field] = issue.message;
         });
         const apiError = new ApiError(httpStatus.BAD_REQUEST, 'Validation failed');
-        // Add additional property if you support error arrays
-        (apiError as any).errors = errors; 
+        // Attach validation details for the client
+        (apiError as any).validationErrors = errors;
         return next(apiError);
       }
       return next(error);
