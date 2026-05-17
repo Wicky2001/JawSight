@@ -11,10 +11,16 @@ type PageWrapperProps = {
  */
 export const PageWrapper = ({ children }: PageWrapperProps) => {
   return (
-    <div className="h-full w-full bg-slate-50 flex flex-col min-h-0 overflow-hidden">
-      <div className={"w-full overflow-y-auto h-full flex-1 min-h-0"}>
-        {children}
-      </div>
+    <div className="h-full w-full bg-slate-50 flex flex-col overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+    </div>
+  );
+};
+
+export const PageContent = ({ children }: PageWrapperProps) => {
+  return (
+    <div className="mx-auto w-full px-6 py-8 flex flex-col flex-1 min-h-0">
+      {children}
     </div>
   );
 };
@@ -24,12 +30,16 @@ export const PageWrapper = ({ children }: PageWrapperProps) => {
  * Typically used inside PageWrapper
  */
 
-export const PageContent = ({ children }: PageWrapperProps) => {
+export const InnerPageWrapper = ({ children }: PageWrapperProps) => {
   return (
-    <div className={`mx-auto w-full px-6 py-8 flex flex-col min-h-full`}>
+    <div className="h-full w-full bg-slate-50 flex flex-col mx-auto overflow-hidden px-6 py-8">
       {children}
     </div>
   );
+};
+
+export const InnerPageBody = ({ children }: PageWrapperProps) => {
+  return <div className="flex flex-1 min-h-0 overflow-y-auto">{children}</div>;
 };
 
 /**
@@ -38,7 +48,7 @@ export const PageContent = ({ children }: PageWrapperProps) => {
  */
 export const TablePageWrapper = ({ children }: PageWrapperProps) => {
   return (
-    <div className="h-full w-full bg-slate-50 flex flex-col min-h-0 overflow-y-hidden">
+    <div className="h-full w-full bg-slate-50 flex flex-col overflow-hidden">
       <div className="w-full flex flex-col p-4 sm:p-6 overflow-hidden h-full min-h-0">
         {children}
       </div>

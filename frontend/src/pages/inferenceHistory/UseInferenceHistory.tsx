@@ -15,6 +15,7 @@ export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
   const [rows, setRows] = useState<InferenceHistoryRowType[]>([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [lastSynced, setLastSynced] = useState("");
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
@@ -86,13 +87,23 @@ export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
     }
   }, [requestParams, cancelPendingRequest]);
 
+  // Listen for inference notifications to trigger refresh
+  useEffect(() => {
+    if (inferenceNotificationCount > 0) {
+      setPage(1);
+      setRows([]);
+      setTotalRecords(0);
+      setRefreshToken((current) => current + 1);
+    }
+  }, [inferenceNotificationCount]);
+
   useEffect(() => {
     loadInferenceHistory();
 
     return () => {
       cancelPendingRequest();
     };
-  }, [loadInferenceHistory, cancelPendingRequest, inferenceNotificationCount]);
+  }, [loadInferenceHistory, cancelPendingRequest, refreshToken]);
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchText(value);

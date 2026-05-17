@@ -1,5 +1,6 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { Check, ChevronDown, ScanEye, Loader2 } from "lucide-react";
+import { Check, ChevronDown, ScanEye } from "lucide-react";
+import LoadingSpinner from "../../helpers/ui/LoadingSpinner";
 
 type PageHeaderProps = {
   selectedPatientId: number | null;
@@ -72,8 +73,11 @@ const PageHeader = ({
               <SelectPrimitive.Viewport className="p-1">
                 {isLoading ? (
                   <div className="flex items-center gap-2 px-3 py-2 text-sm text-slate-500">
-                    <Loader2 className="h-4 w-4 animate-spin text-teal-600" />
-                    Loading patients...
+                    <LoadingSpinner
+                      label="Loading patients..."
+                      spinnerClassName="h-4 w-4"
+                      labelClassName="text-slate-500"
+                    />
                   </div>
                 ) : dropDownData.length === 0 ? (
                   <div className="px-3 py-2 text-sm text-slate-500">

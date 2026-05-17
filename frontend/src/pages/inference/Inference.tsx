@@ -4,11 +4,11 @@ import {
   CheckCircle,
   Image as ImageIcon,
   AlertCircle,
-  Loader2,
 } from "lucide-react";
 import { api } from "../../helpers/apiClient/apiClient";
 import { dataURLtoFile } from "../../helpers/utils";
 import { InfoCallout } from "../../helpers/ui/InfoCallout";
+import LoadingSpinner from "../../helpers/ui/LoadingSpinner";
 import { toastHelper } from "../../helpers/toastHelper";
 import {
   TablePageWrapper,
@@ -280,10 +280,11 @@ const Inference = () => {
               }`}
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Uploading Data...
-                  </>
+                  <LoadingSpinner
+                    label="Uploading Data..."
+                    spinnerClassName="w-5 h-5"
+                    labelClassName="text-white"
+                  />
                 ) : (
                   "Submit for Inference"
                 )}

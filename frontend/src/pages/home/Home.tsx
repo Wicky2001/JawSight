@@ -9,7 +9,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PageContent, PageWrapper } from "../../helpers/ui/PageWrapper";
+import { PageWrapper } from "../../helpers/ui/PageWrapper";
 
 const Home = () => {
   return (

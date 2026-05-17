@@ -1,19 +1,13 @@
 import { useEffect, useCallback, useRef, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import { AlertCircle, ShieldAlert, RefreshCw } from "lucide-react";
 import {
-  ClipboardClock,
-  ShieldAlert,
-  RefreshCw,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
-import {
-  TablePageWrapper,
-  TableContentWrapper,
-  PageContent,
-  PageWrapper,
+  InnerPageWrapper,
+  InnerPageBody,
 } from "../../../helpers/ui/PageWrapper";
+import NoDataFoundBanner from "../../../helpers/ui/NoDataFoundBanner";
+import LoadingSpinner from "../../../helpers/ui/LoadingSpinner";
 import { api } from "../../../helpers/apiClient/apiClient";
 import { toastHelper } from "../../../helpers/toastHelper";
 import ImageCard from "./ImageCard";
@@ -113,35 +107,36 @@ const PatientsDetailView = () => {
 
   if (!patient) {
     return (
-      <div className="h-full w-full bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle className="w-12 h-12 text-slate-400 mb-4" />
-        <h2 className="text-xl font-semibold text-slate-700">
-          Patient Data Missing
-        </h2>
-        <p className="text-slate-500 mt-2">
-          Please navigate to this page from the patient directory.
-        </p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-6 text-teal-600 font-medium hover:underline"
-        >
-          Go Back
-        </button>
-      </div>
+      <InnerPageWrapper>
+        <NoDataFoundBanner
+          icon={AlertCircle}
+          title="Patient data not found"
+          description="Please open this page from the patient directory so the selected patient can be loaded from the backend."
+          action={
+            <button
+              onClick={() => navigate(-1)}
+              className="text-teal-600 font-medium hover:underline"
+            >
+              Go Back
+            </button>
+          }
+        />
+      </InnerPageWrapper>
     );
   }
 
   return (
-    <PageWrapper>
-      <PageContent>
-        <PatientInfoCard patient={patient} />
+    <InnerPageWrapper>
+      <PatientInfoCard patient={patient} />
+      <InnerPageBody>
         {loading && !detailsData ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-teal-600 py-12">
-            <Loader2 className="w-10 h-10 animate-spin mb-4" />
-            <p className="text-slate-600 font-medium animate-pulse">
-              Loading iterations...
-            </p>
-          </div>
+          <LoadingSpinner
+            centered
+            label="Loading patient results..."
+            className="flex-1 py-12"
+            spinnerClassName="w-10 h-10"
+            labelClassName="text-slate-600"
+          />
         ) : detailsData?.iteration_details &&
           detailsData.iteration_details.length > 0 ? (
           <div className="flex flex-col gap-12 pb-10">
@@ -216,17 +211,14 @@ const PatientsDetailView = () => {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-500 bg-white rounded-2xl border border-slate-200 border-dashed py-16">
-            <ClipboardClock className="w-12 h-12 mb-3 text-slate-300" />
-            <p className="text-lg font-medium text-slate-600">No data found.</p>
-            <p className="text-sm">
-              The inference results for this patient are either empty or not
-              ready yet.
-            </p>
-          </div>
+          <NoDataFoundBanner
+            icon={AlertCircle}
+            title="No patient results found"
+            description="The backend did not return any iteration details for this patient yet."
+          />
         )}
-      </PageContent>
-    </PageWrapper>
+      </InnerPageBody>
+    </InnerPageWrapper>
   );
 };
 

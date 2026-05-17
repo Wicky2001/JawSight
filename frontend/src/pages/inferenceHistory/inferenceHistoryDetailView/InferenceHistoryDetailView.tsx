@@ -3,14 +3,14 @@ import axios from "axios";
 import { toastHelper } from "../../../helpers/toastHelper";
 import { useParams } from "react-router-dom";
 import {
-  TablePageWrapper,
-  TableContentWrapper,
-  PageContent,
-  PageWrapper,
+  InnerPageBody,
+  InnerPageWrapper,
 } from "../../../helpers/ui/PageWrapper";
+import NoDataFoundBanner from "../../../helpers/ui/NoDataFoundBanner";
+import LoadingSpinner from "../../../helpers/ui/LoadingSpinner";
 import PageHeader from "../../../helpers/ui/PageHeader";
 import ImageCard from "./ImageCard";
-import { ClipboardClock, ShieldAlert, RefreshCw, Loader2 } from "lucide-react";
+import { ClipboardClock, ShieldAlert, RefreshCw } from "lucide-react";
 import { api } from "../../../helpers/apiClient/apiClient";
 import type {
   InferenceDetailViewResponseType,
@@ -111,20 +111,22 @@ const InferenceHistoryDetailView = () => {
   };
 
   return (
-    <PageWrapper>
-      <PageContent>
-        <PageHeader
-          title={`Inference Report - ${patient_name}`}
-          description="View detailed inference results and access generated images."
-          Icon={ClipboardClock}
-        />
+    <InnerPageWrapper>
+      <PageHeader
+        title={`Inference Report - ${patient_name}`}
+        description="View detailed inference results and access generated images."
+        Icon={ClipboardClock}
+      />
+
+      <InnerPageBody>
         {loading && !signUrls ? (
-          <div className="flex flex-col items-center justify-center text-teal-600 py-12">
-            <Loader2 className="w-10 h-10 animate-spin mb-4" />
-            <p className="text-slate-600 font-medium animate-pulse">
-              Loading patient results...
-            </p>
-          </div>
+          <LoadingSpinner
+            centered
+            label="Loading patient results..."
+            className="flex-1 py-12"
+            spinnerClassName="w-10 h-10"
+            labelClassName="text-slate-600"
+          />
         ) : signUrls ? (
           <div className="h-full flex flex-col gap-8 pb-10">
             {/* Images Grid */}
@@ -179,19 +181,14 @@ const InferenceHistoryDetailView = () => {
             </div>
           </div>
         ) : (
-          /* Empty/Error State */
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-500 bg-white rounded-2xl border border-slate-200 border-dashed">
-            <ClipboardClock className="w-12 h-12 mb-3 text-slate-300" />
-            <p className="text-lg font-medium text-slate-600">
-              No inference data found.
-            </p>
-            <p className="text-sm">
-              The results for this patient may not be ready yet.
-            </p>
-          </div>
+          <NoDataFoundBanner
+            icon={ClipboardClock}
+            title="No inference data found"
+            description="The backend did not return any inference history for this patient yet."
+          />
         )}
-      </PageContent>
-    </PageWrapper>
+      </InnerPageBody>
+    </InnerPageWrapper>
   );
 };
 

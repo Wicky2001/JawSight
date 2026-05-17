@@ -11,12 +11,29 @@ import {
   ChevronUp,
   Clock,
   Edit2,
-  Loader2,
   Search,
   Trash2,
   Ellipsis,
   CirclePlus,
 } from "lucide-react";
+import LoadingSpinner from "./LoadingSpinner";
+
+type TableEmptyStateProps = {
+  title: string;
+  description: string;
+};
+
+const TableEmptyState = ({ title, description }: TableEmptyStateProps) => {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 px-4 py-4 text-center text-slate-500">
+      <Search className="h-9 w-9 text-slate-300" />
+      <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+      <p className="max-w-lg text-xs leading-relaxed text-slate-500">
+        {description}
+      </p>
+    </div>
+  );
+};
 
 export type ColumnDef = {
   headerName: string;
@@ -257,13 +274,35 @@ export const Table = <T extends Record<string, any>>({
             </tr>
           </thead>
           <tbody className="h-full">
+            {loading && rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={cols.length + (showDelete || showEdit ? 1 : 0)}
+                  className="p-0"
+                >
+                  <div className="flex min-h-[240px] items-center justify-center py-10">
+                    <LoadingSpinner
+                      centered
+                      label="Loading records..."
+                      spinnerClassName="h-6 w-6"
+                      labelClassName="text-primary"
+                    />
+                  </div>
+                </td>
+              </tr>
+            ) : null}
             {rows.length === 0 && !loading ? (
               <tr>
                 <td
                   colSpan={cols.length + (showDelete || showEdit ? 1 : 0)}
-                  className=" h-full text-center p-8 text-secondary"
+                  className="p-0"
                 >
-                  No records found.
+                  <div className="p-4">
+                    <TableEmptyState
+                      title="No records found"
+                      description="There are no matching table rows for the current filters or search terms."
+                    />
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -338,16 +377,17 @@ export const Table = <T extends Record<string, any>>({
           </tbody>
         </table>
 
-        {loading && (
+        {loading && rows.length > 0 ? (
           <div className="sticky bottom-0 left-0 right-0 p-4 flex justify-center items-center surface-elevated z-30">
             <div className="flex items-center gap-3 px-6 py-2 surface-card border border-primary rounded-full card-shadow">
-              <Loader2 className="animate-spin text-primary" size={18} />
-              <span className="text-sm font-medium text-primary">
-                Loading records...
-              </span>
+              <LoadingSpinner
+                label="Loading more records..."
+                spinnerClassName="w-[18px] h-[18px]"
+                labelClassName="text-primary"
+              />
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
