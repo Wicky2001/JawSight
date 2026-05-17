@@ -1,6 +1,10 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table } from "../../helpers/ui/TableComponent";
+import {
+  TablePageWrapper,
+  TableContentWrapper,
+} from "../../helpers/ui/PageWrapper";
 import type { ColumnDef } from "../../helpers/ui/TableComponent";
 import PageHeader from "../../helpers/ui/PageHeader";
 import SideBar from "../../helpers/ui/SideBar";
@@ -105,17 +109,15 @@ const Patients = () => {
   );
 
   return (
-    <div className="h-full w-full bg-slate-50 flex flex-col min-h-0 overflow-hidden">
-      <div className="w-full flex flex-col p-4 sm:p-6 overflow-hidden h-full min-h-0">
-        <div className="flex items-center justify-between mb-4">
-          <PageHeader
-            title="Patients"
-            description="Manage patient information and records."
-            Icon={Users}
-          />
-        </div>
+    <>
+      <TablePageWrapper>
+        <PageHeader
+          title="Patients"
+          description="Manage patient information and records."
+          Icon={Users}
+        />
 
-        <div className="w-full overflow-hidden mt-4 h-full flex-1 min-h-0">
+        <TableContentWrapper>
           <Table
             cols={columns}
             showAdd={true}
@@ -139,8 +141,8 @@ const Patients = () => {
               }
             }}
           />
-        </div>
-      </div>
+        </TableContentWrapper>
+      </TablePageWrapper>
 
       <SideBar
         isOpen={isSideBarVisible}
@@ -158,7 +160,7 @@ const Patients = () => {
           closeSideBar={onCloseSideBar}
         />
       </SideBar>
-    </div>
+    </>
   );
 };
 

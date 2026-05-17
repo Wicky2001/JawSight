@@ -16,12 +16,14 @@ type SocketContextType = {
   socket: Socket | null;
   latestPrediction: any | null;
   clearPrediction: () => void;
+  inferenceNotificationCount: number;
 };
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   latestPrediction: null,
   clearPrediction: () => {},
+  inferenceNotificationCount: 0,
 });
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
@@ -73,6 +75,9 @@ export const SocketProvider = ({ children }: Props) => {
   const { user, isAuthenticated } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [latestPrediction, setLatestPrediction] = useState<any | null>(null);
+  //Trigger for frontend History page.
+  const [inferenceNotificationCount, setInferenceNotificationCount] =
+    useState(0);
   const socketRef = useRef<Socket | null>(null);
   const refreshingRef = useRef(false);
 
@@ -139,6 +144,7 @@ export const SocketProvider = ({ children }: Props) => {
       } else {
         toast.error(data.message || "An error occurred during prediction.");
       }
+      setInferenceNotificationCount((count) => count + 1);
     });
 
     socket.on("disconnect", (reason) => {
@@ -162,7 +168,12 @@ export const SocketProvider = ({ children }: Props) => {
 
   return (
     <SocketContext.Provider
-      value={{ socket, latestPrediction, clearPrediction }}
+      value={{
+        socket,
+        latestPrediction,
+        clearPrediction,
+        inferenceNotificationCount,
+      }}
     >
       {children}
     </SocketContext.Provider>

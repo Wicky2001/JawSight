@@ -2,6 +2,16 @@ import { useState, useEffect } from "react";
 import { toastHelper } from "../../helpers/toastHelper";
 import { createPatient, updatePatient } from "./Patients.service";
 import {
+  FormSubmitButton,
+  NumberStepperField,
+  RadixSelectField,
+  TextInputField,
+  getInputClass,
+  incrementNumericValue,
+  decrementNumericValue,
+  clearFieldError,
+} from "../../helpers/ui/forms";
+import {
   createPatientFormSchema,
   updatePatientFormSchema,
   type PatientsRowType,
@@ -83,6 +93,29 @@ const PatientForm = ({
     }
   };
 
+  const incrementAge = () => {
+    setFormData((prev) => {
+      return { ...prev, age: incrementNumericValue(prev.age, 150) };
+    });
+
+    if (errors.age) {
+      setErrors(clearFieldError(errors, "age"));
+    }
+  };
+
+  const decrementAge = () => {
+    setFormData((prev) => {
+      return { ...prev, age: decrementNumericValue(prev.age, 1) };
+    });
+
+    if (errors.age) {
+      setErrors(clearFieldError(errors, "age"));
+    }
+  };
+
+  const inputClass = (field: keyof typeof formData) =>
+    getInputClass(!!errors[field]);
+
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -129,112 +162,76 @@ const PatientForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Name Field */}
-      <div>
-        <label className="block text-sm font-semibold text-primary mb-2">
-          Name <span className="text-destructive">*</span>
-        </label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.name ? "input-invalid" : ""} disabled:opacity-60`}
-          placeholder="Enter patient name"
-        />
-        {errors.name && (
-          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
-            <span>•</span> {errors.name}
-          </p>
-        )}
-      </div>
-
-      {/* Age Field */}
-      <div>
-        <label className="block text-sm font-semibold text-primary mb-2">
-          Age <span className="text-destructive">*</span>
-        </label>
-        <input
-          type="number"
-          name="age"
-          value={formData.age}
-          onChange={handleChange}
-          disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.age ? "input-invalid" : ""} disabled:opacity-60`}
-          placeholder="Enter age"
-          min="1"
-          max="150"
-        />
-        {errors.age && (
-          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
-            <span>•</span> {errors.age}
-          </p>
-        )}
-      </div>
-
-      {/* Email Field */}
-      <div>
-        <label className="block text-sm font-semibold text-primary mb-2">
-          Email <span className="text-destructive">*</span>
-        </label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.email ? "input-invalid" : ""} disabled:opacity-60`}
-          placeholder="Enter email address"
-        />
-        {errors.email && (
-          <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
-            <span>•</span> {errors.email}
-          </p>
-        )}
-      </div>
-
-      {/* Gender Field */}
-      <div>
-        <label className="block text-sm font-semibold text-primary mb-2">
-          Gender <span className="text-destructive">*</span>
-        </label>
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, gender: e.target.value }))
-          }
-          disabled={isLoading}
-          className={`w-full px-4 py-2.5 text-sm rounded-lg transition-all focus:outline-none input-focus themed-input ${errors.gender ? "input-invalid" : ""} disabled:opacity-60`}
-        >
-          <option value="MALE">Male</option>
-          <option value="FEMALE">Female</option>
-        </select>
-        {errors.gender && (
-          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-            <span>•</span> {errors.gender}
-          </p>
-        )}
-      </div>
-
-      {/* Submit Button */}
-      <button
-        type="submit"
+      <TextInputField
+        label="Name"
+        required={true}
+        type="text"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
         disabled={isLoading}
-        className="w-full mt-6 px-4 py-3 btn-primary text-sm font-semibold rounded-lg hover:brightness-95 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        {isLoading ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            Saving...
-          </span>
-        ) : isEdit ? (
-          "Update Patient"
-        ) : (
-          "Add Patient"
-        )}
-      </button>
+        inputClassName={inputClass("name")}
+        placeholder="Enter patient name"
+        error={errors.name}
+      />
+
+      <NumberStepperField
+        label="Age"
+        required={true}
+        name="age"
+        value={formData.age}
+        onChange={handleChange}
+        onIncrement={incrementAge}
+        onDecrement={decrementAge}
+        disabled={isLoading}
+        placeholder="Enter age"
+        min={1}
+        max={150}
+        error={errors.age}
+        helperText="Maximum of 150"
+      />
+
+      <TextInputField
+        label="Email"
+        required={true}
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        disabled={isLoading}
+        inputClassName={inputClass("email")}
+        placeholder="Enter email address"
+        error={errors.email}
+      />
+
+      <RadixSelectField
+        label="Gender"
+        required={true}
+        value={formData.gender}
+        onValueChange={(value) => {
+          setFormData((prev) => ({ ...prev, gender: value }));
+          if (errors.gender) {
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              delete newErrors.gender;
+              return newErrors;
+            });
+          }
+        }}
+        disabled={isLoading}
+        options={[
+          { label: "Male", value: "MALE" },
+          { label: "Female", value: "FEMALE" },
+        ]}
+        triggerClassName={inputClass("gender")}
+        placeholder="Select gender"
+        error={errors.gender}
+      />
+
+      <FormSubmitButton
+        isLoading={isLoading}
+        idleLabel={isEdit ? "Update Patient" : "Add Patient"}
+      />
     </form>
   );
 };

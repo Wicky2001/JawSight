@@ -7,7 +7,7 @@ interface PatientInfoCardProps {
 
 const PatientInfoCard = ({ patient }: PatientInfoCardProps) => {
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="w-full bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-sm flex items-center transition-all hover:shadow-md">
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center border border-teal-100 shrink-0">
           <User className="w-8 h-8 text-teal-600" />

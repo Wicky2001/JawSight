@@ -27,9 +27,18 @@ export type PatientsRowType = {
   createdAt: string;
 };
 
+export type PatientDropdownItemType = {
+  id: number;
+  name: string;
+};
+
 export type GetPatientsResponseType = {
   rows: PatientsRowType[];
   meta: { total: number };
+};
+
+export type GetPatientDropdownResponseType = {
+  rows: PatientDropdownItemType[];
 };
 
 export type CreatePatientRequestType = {

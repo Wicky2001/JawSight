@@ -3,6 +3,8 @@ import type {
   GetPatientsRequestType,
   GetPatientsResponseType,
   PatientsRowType,
+  PatientDropdownItemType,
+  GetPatientDropdownResponseType,
   CreatePatientRequestType,
   UpdatePatientRequestType,
 } from "../../../../shared/types/Patients/Patients.types.js";
@@ -57,6 +59,33 @@ export const getPatients = async (
     throw new ApiError(
       httpStatus.INTERNAL_SERVER_ERROR,
       "Error fetching patients",
+      undefined,
+      error,
+    );
+  }
+};
+
+export const getPatientDropdown = async (
+  doctorId: number,
+): Promise<GetPatientDropdownResponseType> => {
+  try {
+    const rows = await db.Patient.findAll({
+      attributes: ["id", "name"],
+      where: { doctor_id: doctorId },
+      order: [["name", "ASC"]],
+      raw: true,
+    });
+
+    const formattedRows: PatientDropdownItemType[] = rows.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+    }));
+
+    return { rows: formattedRows };
+  } catch (error: any) {
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Error fetching patient dropdown data",
       undefined,
       error,
     );

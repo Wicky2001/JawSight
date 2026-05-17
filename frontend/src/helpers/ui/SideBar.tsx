@@ -27,13 +27,13 @@ const SideBar = ({
 
       {/* Sidebar Panel - Left Aligned */}
       <div
-        className={`fixed top-0 left-0 h-full w-full sm:w-96 sidebar-bg shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 left-0 h-full w-full sm:w-96 sidebar-bg border border-primary rounded-none sm:rounded-r-3xl overflow-hidden shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ zIndex: 9999 }}
       >
         {/* Header Section */}
-        <div className="px-6 py-5 border-b border-primary brand-subtle">
+        <div className="px-6 py-5 border-b border-primary brand-subtle rounded-none sm:rounded-tr-3xl">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-primary">{title}</h2>
             <button

@@ -48,33 +48,60 @@ export type CommonTableProps<T> = {
 const getStatusIcon = (value: number | string) => {
   const raw = String(value ?? "").trim();
   const v = raw.toLowerCase();
-  let cls = "badge-neutral";
+
+  // Define themes for different statuses (Light & Dark mode compatible)
+  const styles = {
+    success: {
+      wrapper:
+        "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-400/10 dark:text-emerald-300 dark:border-emerald-400/30",
+      dot: "bg-emerald-600 dark:bg-emerald-300",
+    },
+    info: {
+      wrapper:
+        "bg-cyan-50 text-cyan-800 border-cyan-200 dark:bg-cyan-400/10 dark:text-cyan-300 dark:border-cyan-400/30",
+      dot: "bg-cyan-600 dark:bg-cyan-300",
+    },
+    warning: {
+      wrapper:
+        "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-400/10 dark:text-amber-300 dark:border-amber-400/30",
+      dot: "bg-amber-600 dark:bg-amber-300",
+    },
+    error: {
+      wrapper:
+        "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-400/10 dark:text-rose-300 dark:border-rose-400/30",
+      dot: "bg-rose-600 dark:bg-rose-300",
+    },
+    neutral: {
+      wrapper:
+        "bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-700/40 dark:text-slate-200 dark:border-slate-600",
+      dot: "bg-slate-500 dark:bg-slate-300",
+    },
+  };
+
+  let theme = styles.neutral;
 
   if (["success", "completed", "done", "active", "ok"].includes(v)) {
-    cls = "badge-success";
+    theme = styles.success;
   } else if (["pending", "processing", "in-progress", "queued"].includes(v)) {
-    cls = "badge-info";
+    theme = styles.info;
   } else if (["warning", "attention"].includes(v)) {
-    cls = "badge-warning";
+    theme = styles.warning;
   } else if (["failed", "error", "rejected", "cancelled"].includes(v)) {
-    cls = "badge-error";
+    theme = styles.error;
   } else if (/^\d+$/.test(v)) {
-    // numeric statuses — treat 0 as info, 1 as success, others neutral
-    if (v === "0") cls = "badge-info";
-    else if (v === "1") cls = "badge-success";
-    else cls = "badge-neutral";
+    if (v === "0") theme = styles.info;
+    else if (v === "1") theme = styles.success;
   }
 
   return (
     <span
-      className={`badge px-2 py-1 rounded text-xs`}
-      aria-label={`status-${raw}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide uppercase border transition-colors ${theme.wrapper}`}
     >
-      <span className={cls}>{raw}</span>
+      <span className={`h-1.5 w-1.5 rounded-full ${theme.dot}`} />
+      {raw}
     </span>
   );
 };
-
 export const Table = <T extends Record<string, any>>({
   cols = [],
   rows = [],
@@ -163,7 +190,7 @@ export const Table = <T extends Record<string, any>>({
           <input
             type="text"
             placeholder="Search records..."
-            className="w-full pl-10 pr-4 py-2 themed-input input-focus text-sm"
+            className="w-full pl-10 pr-4 py-2 themed-input input-focus text-sm rounded-lg"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
           />

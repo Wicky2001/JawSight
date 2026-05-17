@@ -6,6 +6,7 @@ import type {
   GetInferenceHistoryResponseType,
   InferenceHistoryRowType,
 } from "../../../../shared/types/InferenceHistory/InferenceHistory.types.js";
+import { useSocket } from "../../context/SocketContext";
 
 const DEFAULT_LIMIT = 50;
 
@@ -22,6 +23,7 @@ export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const requestIdRef = useRef(0);
+  const { inferenceNotificationCount } = useSocket();
 
   const requestParams = useMemo(
     () => ({
@@ -90,7 +92,7 @@ export const useInferenceHistory = (initialLimit = DEFAULT_LIMIT) => {
     return () => {
       cancelPendingRequest();
     };
-  }, [loadInferenceHistory, cancelPendingRequest]);
+  }, [loadInferenceHistory, cancelPendingRequest, inferenceNotificationCount]);
 
   const handleSearchChange = useCallback((value: string) => {
     setSearchText(value);

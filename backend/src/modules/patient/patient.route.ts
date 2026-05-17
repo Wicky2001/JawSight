@@ -3,6 +3,7 @@ import validate from "../../helpers/validate.js";
 import { auth } from "../../helpers/auth/access.js";
 import {
   getPatientListController,
+  getPatientDropdownController,
   createPatientController,
   updatePatientController,
   deletePatientController,
@@ -24,6 +25,8 @@ router
   .post(auth, validate(createPatientSchema), createPatientController)
   .put(auth, validate(updatePatientSchema), updatePatientController)
   .delete(auth, validate(deletePatientSchema), deletePatientController);
+
+router.route("/dropdown").get(auth, getPatientDropdownController);
 
 router.use("/detail-view", patientDetailViewRouter);
 

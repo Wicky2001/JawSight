@@ -27,6 +27,15 @@ export const getPatientListController = catchAsync(
   },
 );
 
+export const getPatientDropdownController = catchAsync(
+  async (req: Request, res: Response) => {
+    const doctorId = (req as any).user?.id;
+    const results = await patientService.getPatientDropdown(doctorId);
+
+    res.status(httpStatus.OK).json(results);
+  },
+);
+
 export const createPatientController = catchAsync(
   async (req: Request, res: Response) => {
     const doctorId = (req as any).user?.id;

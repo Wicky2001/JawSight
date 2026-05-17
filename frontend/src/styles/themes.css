@@ -68,7 +68,7 @@
     42,
     0.6
   ); /* overlay for modals (light uses translucent dark) */
-  --color-navbar-bg: #ffffff;
+  --color-navbar-bg: #63a361;
   --color-sidebar-bg: #f3f6f8;
   --color-table-header-bg: #f1f5f9; /* subtle header */
   --color-table-row-bg: #ffffff;
@@ -146,7 +146,7 @@
   --color-surface-card: #161616;
   --color-surface-elevated: #1e1e1e;
   --color-modal-bg: rgba(0, 0, 0, 0.6);
-  --color-navbar-bg: #111111;
+  --color-navbar-bg: #63a361;
   --color-sidebar-bg: #111111;
   --color-table-header-bg: #1a1a1a;
   --color-table-row-bg: #0f0f0f;
@@ -287,6 +287,49 @@
 }
 .brand-subtle {
   background: var(--brand-subtle-bg) !important;
+}
+
+/* Navbar styling for green background in both light and dark modes */
+.navbar-bg {
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --brand-primary: #ffffff;
+}
+
+.navbar-bg .text-primary,
+.navbar-bg .text-secondary {
+  color: #ffffff !important;
+}
+.navbar-bg .text-muted {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.navbar-bg .border-primary {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+.navbar-bg .brand-text {
+  color: #ffffff !important;
+}
+.navbar-bg a {
+  color: #ffffff;
+}
+.navbar-bg a:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+.navbar-bg a.active,
+.navbar-bg a[aria-current="page"] {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Footer styling - ensure white text */
+footer {
+  color: #ffffff;
+}
+footer a {
+  color: #ffffff;
+}
+footer a:hover {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* Themed input */
@@ -442,3 +485,267 @@
 .shadow-lg {
   box-shadow: var(--shadow-dropdown) !important;
 }
+
+/* Extended Tailwind color utility mappings */
+/* Slate backgrounds - light mode variants */
+.bg-slate-100 {
+  background-color: var(--color-bg-page) !important;
+}
+.bg-slate-200 {
+  background-color: var(--color-bg-page) !important;
+}
+.bg-slate-800 {
+  background-color: var(--color-surface-elevated) !important;
+}
+
+/* Slate text - additional variants */
+.text-slate-600 {
+  color: var(--text-secondary) !important;
+}
+
+/* Slate borders - additional variants */
+.border-slate-50 {
+  border-color: var(--border-subtle) !important;
+}
+.border-slate-800 {
+  border-color: var(--border-primary) !important;
+}
+
+/* Brand color mapping - teal to brand green */
+.bg-teal-50 {
+  background-color: var(--brand-subtle-bg) !important;
+}
+.bg-teal-100 {
+  background-color: var(--brand-subtle-bg) !important;
+}
+.bg-teal-400 {
+  background-color: var(--brand-primary) !important;
+  opacity: 0.1;
+}
+.bg-teal-500 {
+  background-color: var(--brand-subtle-bg) !important;
+}
+.bg-teal-600 {
+  background-color: var(--brand-primary) !important;
+}
+.bg-teal-700 {
+  background-color: var(--brand-hover) !important;
+}
+
+.text-teal-50 {
+  color: var(--brand-primary) !important;
+}
+.text-teal-100 {
+  color: var(--brand-primary) !important;
+}
+.text-teal-400 {
+  color: var(--brand-primary) !important;
+}
+.text-teal-500 {
+  color: var(--brand-primary) !important;
+}
+.text-teal-600 {
+  color: var(--brand-primary) !important;
+}
+.text-teal-700 {
+  color: var(--brand-hover) !important;
+}
+
+.border-teal-50 {
+  border-color: var(--brand-subtle-bg) !important;
+}
+.border-teal-100 {
+  border-color: var(--brand-subtle-bg) !important;
+}
+.border-teal-400 {
+  border-color: var(--brand-primary) !important;
+}
+.border-teal-500 {
+  border-color: var(--brand-primary) !important;
+}
+.border-teal-600 {
+  border-color: var(--brand-primary) !important;
+}
+
+/* Focus and ring states - brand color */
+.focus\:ring-teal-500\/10:focus {
+  --tw-ring-color: var(--brand-focus-ring) !important;
+}
+.focus\:bg-teal-50:focus {
+  background-color: var(--brand-subtle-bg) !important;
+}
+.focus\:text-teal-700:focus {
+  color: var(--brand-primary) !important;
+}
+
+/* Hover states - teal to brand */
+.hover\:bg-teal-400:hover {
+  background-color: var(--brand-primary) !important;
+  opacity: 0.1;
+}
+.hover\:bg-teal-50:hover {
+  background-color: var(--brand-subtle-bg) !important;
+}
+.hover\:border-teal-400:hover {
+  border-color: var(--brand-primary) !important;
+}
+.hover\:text-teal-500:hover {
+  color: var(--brand-primary) !important;
+}
+.hover\:text-teal-600:hover {
+  color: var(--brand-primary) !important;
+}
+
+/* Data attribute states - brand colors */
+.data-\[state\=checked\]\:bg-teal-50[data-state="checked"] {
+  background-color: var(--brand-subtle-bg) !important;
+}
+.data-\[state\=checked\]\:text-teal-700[data-state="checked"] {
+  color: var(--brand-primary) !important;
+}
+
+/* Status colors - red/error */
+.bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+.bg-red-500 {
+  background-color: var(--error) !important;
+}
+.text-red-600 {
+  color: var(--error) !important;
+}
+.hover\:bg-red-50:hover {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+.hover\:text-red-600:hover {
+  color: var(--error) !important;
+}
+
+/* Status colors - amber/warning */
+.bg-amber-400 {
+  background-color: var(--warning) !important;
+}
+.bg-amber-300 {
+  background-color: #fcd34d !important;
+}
+.text-amber-900 {
+  color: #78350f !important;
+}
+.hover\:bg-amber-300:hover {
+  background-color: #fcd34d !important;
+}
+
+/* Status colors - green/success */
+.bg-green-500 {
+  background-color: var(--success) !important;
+}
+.text-green-600 {
+  color: var(--success) !important;
+}
+
+/* Status colors - blue/info */
+.bg-blue-400 {
+  background-color: var(--info) !important;
+  opacity: 0.1;
+}
+.text-blue-500 {
+  color: var(--info) !important;
+}
+
+/* Group hover states */
+.group-hover\:text-teal-600:is(:hover, :focus-within) {
+  color: var(--brand-primary) !important;
+}
+
+/* Custom utility classes for brand color (green #63A361) */
+.brand-border {
+  border-color: var(--brand-primary) !important;
+}
+.brand-border-subtle {
+  border-color: var(--brand-primary);
+  opacity: 0.5;
+}
+.brand-ring {
+  --tw-ring-color: var(--brand-primary);
+  --tw-ring-opacity: 0.5;
+}
+.brand-text {
+  color: var(--brand-primary) !important;
+}
+.focus\:brand-border:focus {
+  border-color: var(--brand-primary) !important;
+}
+
+/* Additional Tailwind utility mappings for better coverage */
+.bg-gray-50 {
+  background-color: var(--color-bg-page) !important;
+}
+.bg-gray-100 {
+  background-color: var(--color-bg-page) !important;
+}
+
+/* Shadow utilities mapping */
+.shadow-xl {
+  box-shadow: var(--shadow-dropdown) !important;
+}
+.shadow-2xl {
+  box-shadow: var(--shadow-modal) !important;
+}
+
+/* Ring utilities mapping - use brand color */
+.ring-offset-white {
+  --tw-ring-offset-color: var(--color-surface-card) !important;
+}
+
+/* Scrollbar styling with theme colors */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+/* Documentation for theme system usage:
+   
+   HOW TO USE THEME COLORS IN YOUR COMPONENTS:
+   
+   1. For Tailwind utilities (bg-*, text-*, border-*, etc.):
+      Use the mapped utilities below - they automatically use theme colors
+      Example: className="bg-white text-slate-900 border-slate-200"
+      
+   2. For inline styles with CSS variables:
+      Use CSS variable names directly
+      Example: style={{ color: 'var(--text-primary)' }}
+      
+   3. For brand/green colors specifically:
+      Use: "text-teal-600", "bg-teal-600", "border-teal-600"
+      Or: style={{ color: 'var(--brand-primary)' }}
+      
+   4. For status colors:
+      - Success: var(--success) or .text-green-500
+      - Error: var(--error) or .text-red-600
+      - Warning: var(--warning) or .bg-amber-400
+      - Info: var(--info) or .text-blue-500
+      
+   5. Available CSS variables (for inline styles):
+      Colors: --color-bg-app, --color-bg-page, --color-surface-card, --color-surface-elevated
+      Text: --text-primary, --text-secondary, --text-muted, --text-disabled, --text-inverse
+      Brand: --brand-primary, --brand-hover, --brand-active, --brand-subtle-bg, --brand-focus-ring
+      Borders: --border-primary, --border-subtle, --input-border, --border-active, --divider
+      Status: --success, --warning, --error, --info
+      Shadows: --shadow-card, --shadow-dropdown, --shadow-modal, --shadow-hover
+      
+   NOTE: Do NOT use hardcoded hex colors like #63A361 or #ffffff in component classes.
+         Always use the theme system for consistency across light/dark modes.
+*/
