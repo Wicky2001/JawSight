@@ -22,6 +22,8 @@ const SideBar = ({
         <div
           className="fixed inset-0 modal-overlay backdrop-blur-sm z-40 transition-opacity"
           onClick={onClose}
+          aria-hidden="true"
+          inert
         />
       )}
 
@@ -31,6 +33,8 @@ const SideBar = ({
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ zIndex: 9999 }}
+        aria-modal={isOpen}
+        role="dialog"
       >
         {/* Header Section */}
         <div className="px-6 py-5 border-b border-primary brand-subtle rounded-none sm:rounded-tr-3xl">

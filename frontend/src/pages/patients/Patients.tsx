@@ -15,6 +15,7 @@ import type { PatientsRowType } from "../../../../shared/types/Patients/Patients
 import type { PatientsDetailViewPatientInfoType } from "../../../../shared/types/Patients/PatientsDetailView/PatientsDetailView.types";
 import PatientForm from "./PatientForm";
 import { deletePatient } from "./Patients.service";
+import ConfirmDialog from "../../helpers/ui/ConfirmDialog";
 
 const Patients = () => {
   const navigate = useNavigate();
@@ -33,6 +34,10 @@ const Patients = () => {
   const [editingPatient, setEditingPatient] = useState<
     PatientsRowType | undefined
   >();
+  const [deleteCandidate, setDeleteCandidate] = useState<{
+    id: number;
+    name?: string;
+  } | null>(null);
 
   const columns: ColumnDef[] = [
     {
@@ -85,17 +90,17 @@ const Patients = () => {
     });
   }, []);
 
-  const onCloseSideBar = useCallback(() => {
-    setIsSideBarVisible(false);
+  const clearPatientForm = useCallback(() => {
     setEditingPatient(undefined);
   }, []);
 
+  const onCloseSideBar = useCallback(() => {
+    setIsSideBarVisible(false);
+    clearPatientForm();
+  }, [clearPatientForm]);
+
   const handleDeleteClick = useCallback(
     async (patientId: number) => {
-      if (!window.confirm("Are you sure you want to delete this patient?")) {
-        return;
-      }
-
       try {
         await deletePatient(patientId);
         toastHelper.success("Patient deleted successfully");
@@ -107,6 +112,23 @@ const Patients = () => {
     },
     [refreshPatients],
   );
+
+  const requestDeletePatient = useCallback(
+    (patientId: number, name?: string) => {
+      setDeleteCandidate({ id: patientId, name });
+    },
+    [],
+  );
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteCandidate) {
+      return;
+    }
+
+    const { id } = deleteCandidate;
+    setDeleteCandidate(null);
+    await handleDeleteClick(id);
+  }, [deleteCandidate, handleDeleteClick]);
 
   return (
     <>
@@ -137,7 +159,10 @@ const Patients = () => {
             onDelete={(ids) => {
               if (ids.length > 0) {
                 const id = ids[0];
-                handleDeleteClick(typeof id === "object" ? id.id : id);
+                requestDeletePatient(
+                  typeof id === "object" ? id.id : id,
+                  typeof id === "object" ? id.name : undefined,
+                );
               }
             }}
           />
@@ -160,6 +185,20 @@ const Patients = () => {
           closeSideBar={onCloseSideBar}
         />
       </SideBar>
+
+      <ConfirmDialog
+        open={Boolean(deleteCandidate)}
+        title="Delete patient?"
+        message={
+          deleteCandidate?.name
+            ? `Are you sure you want to delete ${deleteCandidate.name}? This action cannot be undone.`
+            : "Are you sure you want to delete this patient? This action cannot be undone."
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteCandidate(null)}
+      />
     </>
   );
 };

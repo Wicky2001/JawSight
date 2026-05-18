@@ -62,7 +62,8 @@ export const getPatientDetailView = async (
       [];
 
     for (const history of inferenceHistories) {
-      const outputBucketKeys = history.output_bucket_keys;
+      const historyJson = history.toJSON();
+      const outputBucketKeys = historyJson.output_bucket_keys;
 
       if (
         !outputBucketKeys?.left ||
@@ -73,7 +74,7 @@ export const getPatientDetailView = async (
       }
 
       iteration_details.push({
-        iteration_code: history.iteration_code,
+        iteration_code: historyJson.iteration_code,
         left_sign_image_url: await signBucketKey(outputBucketKeys.left),
         right_sign_image_url: await signBucketKey(outputBucketKeys.right),
         front_sign_image_url: await signBucketKey(outputBucketKeys.front),

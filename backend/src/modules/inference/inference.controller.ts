@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import httpStatus from "http-status";
 import {
   pushToSqsQueue,
@@ -6,6 +6,7 @@ import {
   saveInputImageKeysToDB,
   processInferenceResult,
   emitToDoctor,
+  resultTimeOutService,
 } from "./inference.service.js";
 import ApiError from "../../helpers/ApiError.js";
 import { catchAsync } from "../../helpers/error.handlers.js";
@@ -14,27 +15,18 @@ import { UploadedDataObject } from "./types.js";
 import { validateSnsPayload } from "./validations.js";
 import { confirmSnsSubscription } from "./inference.service.js";
 
-export const snsWebhookController = async (
-  req: Request,
-  res: Response,
-) => {
-
+export const snsWebhookController = async (req: Request, res: Response) => {
   const io = req.app.get("socketio");
 
   try {
-
     const snsMessageType = req.headers["x-amz-sns-message-type"];
 
-    const body =
-      typeof req.body === "string"
-        ? JSON.parse(req.body)
-        : req.body;
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
     // =========================
     // Subscription Confirmation
     // =========================
     if (snsMessageType === "SubscriptionConfirmation") {
-
       await confirmSnsSubscription(body.SubscribeURL);
 
       return res.status(httpStatus.OK).json({
@@ -54,7 +46,6 @@ export const snsWebhookController = async (
     // Acknowledge SNS Immediately
     // =========================
     res.status(httpStatus.OK).send("Message Received");
-  
 
     // =========================
     // Parse Notification
@@ -63,12 +54,8 @@ export const snsWebhookController = async (
 
     const { status, data, message } = payload;
 
-    const {
-      doctor_id,
-      patient_id,
-      iterationId,
-      output_images_keys,
-    } = data || {};
+    const { doctor_id, patient_id, iterationId, output_images_keys } =
+      data || {};
 
     // =========================
     // Validation
@@ -103,21 +90,12 @@ export const snsWebhookController = async (
       message: message || "Inference completed successfully",
       data: signedUrls,
     });
-
   } catch (error) {
-
-    console.error("SNS Webhook Error:", error);
-
     try {
-
       const body =
-        typeof req.body === "string"
-          ? JSON.parse(req.body)
-          : req.body;
+        typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 
-      const payload = body?.Message
-        ? JSON.parse(body.Message)
-        : null;
+      const payload = body?.Message ? JSON.parse(body.Message) : null;
 
       const doctor_id = payload?.data?.doctor_id;
 
@@ -127,19 +105,14 @@ export const snsWebhookController = async (
           message: "An unknown error occurred during inference",
         });
       }
-
     } catch (innerError) {
-
-      console.error(
-        "Error handling SNS webhook error:",
-        innerError,
-      );
+      // Silently fail if unable to notify doctor
     }
   }
 };
 
 export const uploadImagesController = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response) => {
     const patientId = req.body?.patientId;
     if (!patientId) {
       throw new ApiError(
@@ -176,11 +149,12 @@ export const uploadImagesController = catchAsync(
     );
 
     // save bucket keys to DB
-    await saveInputImageKeysToDB(uploadedData);
+    const inferenceHistoryId = await saveInputImageKeysToDB(uploadedData);
 
-    console.log("SNS UPLOADED MESSAGE = ", uploadedData);
-    // 3. Push the message to SQS
+    // Push the message to SQS
     await pushToSqsQueue(uploadedData);
+
+    resultTimeOutService(inferenceHistoryId, 15);
 
     res.status(httpStatus.ACCEPTED).json({
       status: "success",

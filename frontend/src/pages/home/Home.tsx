@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   ScanFace,
   LineChart,
-  CheckCircle2,
   UploadCloud,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -47,43 +46,14 @@ const Home = () => {
                   <div className="flex justify-between items-center text-slate-400 mb-4 z-10">
                     <div className="flex items-center gap-2">
                       <ScanFace className="w-5 h-5 text-teal-600" />
-                      <span className="text-sm font-medium text-white">
-                        Processing Frontal/Lateral
-                      </span>
                     </div>
-                    <span className="text-xs bg-slate-800 text-white px-2 py-1 rounded-md">
-                      86% Complete
-                    </span>
                   </div>
 
                   {/* Minimal face tracking dots */}
-                  <div className="flex-1 relative flex items-center justify-center z-10">
-                    <div className="w-32 h-40 border border-slate-700 rounded-[3rem] relative">
-                      <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-slate-300 rounded-full"></div>
-                      <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-slate-300 rounded-full"></div>
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-2 h-2 bg-teal-600 rounded-full"></div>
-                      <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 w-16 h-8 border-b-2 border-teal-600 rounded-b-full"></div>
-                      {/* Scanning Line */}
-                      <div className="absolute left-[-10%] right-[-10%] h-[1px] bg-teal-600 top-1/2"></div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 bg-slate-800 rounded-xl p-4 flex items-center justify-between z-10 border border-slate-700">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center">
-                        <CheckCircle2 className="w-4 h-4 text-teal-600" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-white">
-                          Landmarks Aligned
-                        </div>
-                        <div className="text-xs text-slate-400">
-                          Generating prediction model...
-                        </div>
-                      </div>
-                    </div>
-                    <Loader2 className="w-5 h-5 text-teal-600 animate-spin" />
-                  </div>
+                  <div
+                    className="w-full h-full rounded-[1.75rem] bg-center bg-cover bg-no-repeat"
+                    style={{ backgroundImage: "url('/home_page.png')" }}
+                  />
                 </div>
               </div>
             </div>
@@ -242,25 +212,6 @@ function Edit3(props: any) {
     >
       <path d="M12 20h9"></path>
       <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-    </svg>
-  );
-}
-
-function Loader2(props: any) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
     </svg>
   );
 }

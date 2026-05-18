@@ -10,7 +10,7 @@ import NoDataFoundBanner from "../../../helpers/ui/NoDataFoundBanner";
 import LoadingSpinner from "../../../helpers/ui/LoadingSpinner";
 import { api } from "../../../helpers/apiClient/apiClient";
 import { toastHelper } from "../../../helpers/toastHelper";
-import ImageCard from "./ImageCard";
+import ImageCard from "../../../helpers/ui/ImageCard.tsx";
 import PatientInfoCard from "./PatientInfoCard";
 import type {
   PatientsDetailViewPatientInfoType,
@@ -139,7 +139,7 @@ const PatientsDetailView = () => {
           />
         ) : detailsData?.iteration_details &&
           detailsData.iteration_details.length > 0 ? (
-          <div className="flex flex-col gap-12 pb-10">
+          <div className="flex flex-col gap-12 pb-10 w-full">
             {detailsData.iteration_details.map(
               (iteration: PatientsIterationDetailsType, index: number) => (
                 <div
@@ -158,7 +158,7 @@ const PatientsDetailView = () => {
                     </h3>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="flex flex-row justify-around gap-3 lg:gap-2 xl:gap-8 w-full h-full">
                     <ImageCard
                       title="Left Profile"
                       url={iteration.left_sign_image_url}

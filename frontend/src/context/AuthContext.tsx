@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: Props) => {
     const initAuth = async () => {
       try {
         const res = await api.get("/auth/me");
-        debugger;
+
         setUser(res.data.user);
       } catch {
         setUser(null);

@@ -20,7 +20,7 @@ const NoDataFoundBanner = ({
 }: NoDataFoundBannerProps) => {
   return (
     <div
-      className={`flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-6 text-center text-slate-500 ${compact ? "py-6" : "py-16"} ${className}`}
+      className={`flex flex-col w-full items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white px-6 text-center text-slate-500 ${compact ? "py-6" : "py-16"} ${className}`}
     >
       <Icon
         className={`${compact ? "h-10 w-10" : "h-12 w-12"} text-slate-300`}

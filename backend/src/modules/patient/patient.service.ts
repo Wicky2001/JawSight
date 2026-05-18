@@ -12,6 +12,27 @@ import ApiError from "../../helpers/ApiError.js";
 import httpStatus from "http-status";
 import { Op } from "sequelize";
 
+const DUPLICATE_PATIENT_EMAIL_MESSAGE =
+  "A patient with this email already exists for this doctor.";
+
+const findPatientByEmail = async (
+  doctorId: number,
+  email: string,
+  excludePatientId?: number,
+  transaction?: any,
+) => {
+  return db.Patient.findOne({
+    where: {
+      doctor_id: doctorId,
+      email: {
+        [Op.iLike]: email,
+      },
+      ...(excludePatientId ? { id: { [Op.ne]: excludePatientId } } : {}),
+    },
+    transaction,
+  });
+};
+
 export const getPatients = async (
   query: GetPatientsRequestType,
   doctorId: number,
@@ -98,12 +119,27 @@ export const createPatient = async (
 ): Promise<PatientsRowType> => {
   try {
     const newPatient = await db.sequelize.transaction(async (t) => {
+      const email = data.email.trim();
+      const existingPatient = await findPatientByEmail(
+        doctorId,
+        email,
+        undefined,
+        t,
+      );
+
+      if (existingPatient) {
+        throw new ApiError(
+          httpStatus.CONFLICT,
+          "Patient with this email already exists",
+        );
+      }
+
       const patient = await db.Patient.create(
         {
           doctor_id: doctorId,
           name: data.name,
           age: data.age,
-          email: data.email,
+          email,
           gender: data.gender,
         },
         { transaction: t },
@@ -121,6 +157,9 @@ export const createPatient = async (
       createdAt: new Date(newPatient.createdAt).toLocaleString(),
     };
   } catch (error: any) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
     throw new ApiError(
       httpStatus.INTERNAL_SERVER_ERROR,
       "Error creating patient",
@@ -136,6 +175,7 @@ export const updatePatient = async (
 ): Promise<PatientsRowType> => {
   try {
     const updatedPatient = await db.sequelize.transaction(async (t) => {
+      const email = data.email.trim();
       const existing = await db.Patient.findOne({
         where: {
           id: data.id,
@@ -155,7 +195,7 @@ export const updatePatient = async (
         {
           name: data.name,
           age: data.age,
-          email: data.email,
+          email,
           gender: data.gender,
         },
         { transaction: t },

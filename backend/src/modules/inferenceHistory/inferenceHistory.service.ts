@@ -29,6 +29,15 @@ export const getInferenceHistory = async (
   }
 
   const { rows, count } = await db.InferenceHistory.findAndCountAll({
+    attributes: [
+      "id",
+      "patient_id",
+      "doctor_id",
+      "iteration_code",
+      "status",
+      "createdAt",
+      "updatedAt",
+    ],
     where: whereClause,
     include: [
       {
@@ -43,14 +52,26 @@ export const getInferenceHistory = async (
   });
 
   const formattedRows = rows.map((row: any) => {
+    const rowJson = row.toJSON();
+    console.log("Processing Row:", rowJson);
+    console.log(
+      "patient_id:",
+      rowJson.patient_id,
+      "patient:",
+      rowJson.patient,
+      "iteration_code:",
+      rowJson.iteration_code,
+    );
+
     const formattedRow: InferenceHistoryRowType = {
-      patient_id: row.patient.id,
-      patient_name: row.patient.name,
-      iteration_code: row.iteration_code,
-      status: row.status,
-      createdAt: new Date(row.createdAt).toLocaleString(),
-      updatedAt: new Date(row.updatedAt).toLocaleString(),
+      patient_id: Number(rowJson.patient_id),
+      patient_name: rowJson.patient?.name || "",
+      iteration_code: rowJson.iteration_code,
+      status: rowJson.status,
+      createdAt: new Date(rowJson.createdAt).toLocaleString(),
+      updatedAt: new Date(rowJson.updatedAt).toLocaleString(),
     };
+
     return formattedRow;
   });
 

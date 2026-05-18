@@ -1,18 +1,15 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import { catchAsync } from "../../helpers/error.handlers.js";
 import { createAccessToken } from "../../helpers/auth/access.js";
-import { createRefreshToken, verifyRefreshToken } from "../../helpers/auth/refresh.js";
-import passport from "passport";
+import {
+  createRefreshToken,
+  verifyRefreshToken,
+} from "../../helpers/auth/refresh.js";
 import httpStatus from "http-status";
-
-
 
 export const googleCallbackController = catchAsync(
   async (req: Request, res: Response) => {
-
-   
-    
-    let from = req.query.state as string || "/home";
+    let from = (req.query.state as string) || "/home";
     const doctor = req.user as any;
 
     const accessToken = createAccessToken(doctor.id);
@@ -35,23 +32,16 @@ export const googleCallbackController = catchAsync(
       from = "/" + from;
     }
     res.redirect(`${baseUrl}${from}`);
-  }
+  },
 );
 
-
-
 export const meController = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-   
-
-        return res.status(httpStatus.OK).json({
-          success: true,
-          message: "Authenticated successfully",
-          user: req.user,
-        
-        });
-      
-  
+  async (req: Request, res: Response) => {
+    return res.status(httpStatus.OK).json({
+      success: true,
+      message: "Authenticated successfully",
+      user: req.user,
+    });
   },
 );
 
@@ -60,13 +50,17 @@ export const refreshTokenController = catchAsync(
     const refreshToken = req.cookies?.["refresh-token"];
 
     if (!refreshToken) {
-      return res.status(httpStatus.UNAUTHORIZED).json({ message: "No refresh token provided" });
+      return res
+        .status(httpStatus.UNAUTHORIZED)
+        .json({ message: "No refresh token provided" });
     }
 
     const decoded = verifyRefreshToken(refreshToken);
 
     if (!decoded || !decoded.id) {
-      return res.status(httpStatus.UNAUTHORIZED).json({ message: "Invalid or expired refresh token" });
+      return res
+        .status(httpStatus.UNAUTHORIZED)
+        .json({ message: "Invalid or expired refresh token" });
     }
 
     const newAccessToken = createAccessToken(decoded.id);
@@ -81,5 +75,5 @@ export const refreshTokenController = catchAsync(
       success: true,
       message: "Access token refreshed successfully",
     });
-  }
+  },
 );

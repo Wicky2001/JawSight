@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { z } from "zod";
 import { toastHelper } from "../../helpers/toastHelper";
 import { createPatient, updatePatient } from "./Patients.service";
 import {
@@ -11,12 +12,26 @@ import {
   decrementNumericValue,
   clearFieldError,
 } from "../../helpers/ui/forms";
-import {
-  createPatientFormSchema,
-  updatePatientFormSchema,
-  type PatientsRowType,
-  type CreatePatientFormType,
-} from "../../../../shared/types/Patients/Patients.types";
+import { type PatientsRowType } from "../../../../shared/types/Patients/Patients.types";
+
+const createPatientFormSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required")
+    .min(2, "Name must be at least 2 characters"),
+  age: z.coerce
+    .number()
+    .int()
+    .min(19, "Age must be greater than 18")
+    .max(150, "Age must be less than 150"),
+  email: z.string().trim().email("Valid email is required"),
+  gender: z.enum(["MALE", "FEMALE"]),
+});
+
+const updatePatientFormSchema = createPatientFormSchema;
+
+type CreatePatientFormType = z.infer<typeof createPatientFormSchema>;
 
 interface PatientFormProps {
   patchData?: PatientsRowType;
@@ -156,7 +171,10 @@ const PatientForm = ({
       setErrors({});
     } catch (error) {
       console.error("Form submission error:", error);
-      toastHelper.error("Failed to save patient. Please try again.");
+      const message =
+        (error as any)?.response?.data?.message ||
+        "Failed to save patient. Please try again.";
+      toastHelper.error(message);
     }
   };
 
@@ -185,10 +203,10 @@ const PatientForm = ({
         onDecrement={decrementAge}
         disabled={isLoading}
         placeholder="Enter age"
-        min={1}
+        min={19}
         max={150}
         error={errors.age}
-        helperText="Maximum of 150"
+        helperText="Age must be greater than 18"
       />
 
       <TextInputField

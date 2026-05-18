@@ -9,7 +9,7 @@ import {
 import NoDataFoundBanner from "../../../helpers/ui/NoDataFoundBanner";
 import LoadingSpinner from "../../../helpers/ui/LoadingSpinner";
 import PageHeader from "../../../helpers/ui/PageHeader";
-import ImageCard from "./ImageCard";
+import ImageCard from "../../../helpers/ui/ImageCard";
 import { ClipboardClock, ShieldAlert, RefreshCw } from "lucide-react";
 import { api } from "../../../helpers/apiClient/apiClient";
 import type {
@@ -22,6 +22,7 @@ const INFERENCE_DETAIL_VIEW_API_URL = "/inference-history/detail-view";
 const InferenceHistoryDetailView = () => {
   const { patient_id, patient_name, inference_id } = useParams();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const regenerationRequestedRef = useRef(false);
   const [loading, setLoading] = useState(false);
   const [regenerating, setRegenerating] = useState<boolean>(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -31,7 +32,6 @@ const InferenceHistoryDetailView = () => {
     useState<InferenceDetailViewResponseType | null>(null);
 
   const cancelPendingRequest = useCallback(() => {
-    debugger;
     abortControllerRef.current?.abort();
     return;
   }, []);
@@ -39,7 +39,7 @@ const InferenceHistoryDetailView = () => {
   const getInferenceHistoryDetail = useCallback(
     async ({ patient_id, inference_id }: InferenceDetailViewRequestType) => {
       const request_id = ++requestId.current;
-      debugger;
+
       try {
         cancelPendingRequest();
 
@@ -60,18 +60,21 @@ const InferenceHistoryDetailView = () => {
           },
         );
 
-        debugger;
         if (request_id !== requestId.current) {
           return;
         }
-        debugger;
 
         const signUrls = response.data as InferenceDetailViewResponseType;
 
         setSignUrls(signUrls);
+        if (regenerationRequestedRef.current) {
+          toastHelper.warning(
+            "Secure image URLs are being regenerated for another 30 minutes.",
+          );
+          regenerationRequestedRef.current = false;
+        }
       } catch (error) {
         if (axios.isCancel(error)) {
-          debugger;
           console.log(request_id);
           return;
         }
@@ -83,6 +86,7 @@ const InferenceHistoryDetailView = () => {
       } finally {
         if (request_id === requestId.current) {
           setLoading(false);
+          setRegenerating(false);
         }
       }
     },
@@ -90,24 +94,20 @@ const InferenceHistoryDetailView = () => {
   );
 
   useEffect(() => {
-    debugger;
     getInferenceHistoryDetail({
       patient_id: Number(patient_id),
       inference_id: String(inference_id),
     });
 
     return () => {
-      debugger;
       cancelPendingRequest();
     };
   }, [refreshTrigger]);
 
   const handleRegenerateUrls = (): void => {
+    regenerationRequestedRef.current = true;
     setRegenerating(true);
     setRefreshTrigger((prev) => prev + 1);
-    toastHelper.warning(
-      "Secure image URLs are being regenerated for another 30 minutes.",
-    );
   };
 
   return (
@@ -128,20 +128,23 @@ const InferenceHistoryDetailView = () => {
             labelClassName="text-slate-600"
           />
         ) : signUrls ? (
-          <div className="h-full flex flex-col gap-8 pb-10">
+          <div className="flex flex-col  justify-around gap-3 lg:gap-2 xl:gap-8 w-full h-full">
             {/* Images Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ImageCard
                 title="Left Profile"
                 url={signUrls.left_sign_image_url}
+                isLoading={loading}
               />
               <ImageCard
                 title="Front Face"
                 url={signUrls.front_sign_image_url}
+                isLoading={loading}
               />
               <ImageCard
                 title="Right Profile"
                 url={signUrls.right_sign_image_url}
+                isLoading={loading}
               />
             </div>
 

@@ -16,7 +16,56 @@ import {
   Ellipsis,
   CirclePlus,
 } from "lucide-react";
-import LoadingSpinner from "./LoadingSpinner";
+
+type LoadingSpinnerProps = {
+  centered?: boolean;
+  label?: string;
+  spinnerClassName?: string;
+  labelClassName?: string;
+  className?: string;
+};
+
+const LoadingSpinner = ({
+  centered = false,
+  label,
+  spinnerClassName = "h-6 w-6",
+  labelClassName = "text-primary",
+  className = "",
+}: LoadingSpinnerProps) => {
+  const content = (
+    <div className={`flex items-center gap-3 ${className}`}>
+      <svg
+        className={`animate-spin text-current ${spinnerClassName}`}
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+      >
+        <circle
+          className="opacity-20"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-90"
+          fill="currentColor"
+          d="M12 2a10 10 0 0 1 10 10h-4a6 6 0 1 0-6 6v4A10 10 0 0 1 12 2Z"
+        />
+      </svg>
+      {label ? (
+        <span className={`text-sm font-medium ${labelClassName}`}>{label}</span>
+      ) : null}
+    </div>
+  );
+
+  if (centered) {
+    return <div className="flex items-center justify-center">{content}</div>;
+  }
+
+  return content;
+};
 
 type TableEmptyStateProps = {
   title: string;
@@ -186,6 +235,11 @@ export const Table = <T extends Record<string, any>>({
     return String(value);
   };
 
+  const tableColumnSpan = Math.max(
+    1,
+    cols.length + (showDelete || showEdit ? 1 : 0),
+  );
+
   return (
     <div className="flex flex-col h-full min-h-0 w-full surface-card border border-primary rounded-xl overflow-hidden card-shadow">
       {/* Toolbar */}
@@ -273,13 +327,10 @@ export const Table = <T extends Record<string, any>>({
               )}
             </tr>
           </thead>
-          <tbody className="h-full">
+          <tbody>
             {loading && rows.length === 0 ? (
               <tr>
-                <td
-                  colSpan={cols.length + (showDelete || showEdit ? 1 : 0)}
-                  className="p-0"
-                >
+                <td colSpan={tableColumnSpan} className="p-0">
                   <div className="flex min-h-[240px] items-center justify-center py-10">
                     <LoadingSpinner
                       centered
@@ -293,11 +344,8 @@ export const Table = <T extends Record<string, any>>({
             ) : null}
             {rows.length === 0 && !loading ? (
               <tr>
-                <td
-                  colSpan={cols.length + (showDelete || showEdit ? 1 : 0)}
-                  className="p-0"
-                >
-                  <div className="p-4">
+                <td colSpan={tableColumnSpan} className="p-4">
+                  <div className="flex h-full min-h-[300px] w-full items-center justify-center p-4">
                     <TableEmptyState
                       title="No records found"
                       description="There are no matching table rows for the current filters or search terms."
@@ -392,3 +440,33 @@ export const Table = <T extends Record<string, any>>({
     </div>
   );
 };
+
+const demoColumns: ColumnDef[] = [
+  { headerName: "Name", field: "name" },
+  { headerName: "Status", field: "status", sortable: true },
+  { headerName: "Created", field: "createdAt" },
+];
+
+const demoRows = [
+  {
+    id: 1,
+    name: "Demo Patient",
+    status: "completed",
+    createdAt: "May 17, 2026",
+  },
+];
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-50 p-6">
+      <div className="mx-auto flex h-[80vh] max-w-5xl flex-col">
+        <Table
+          cols={demoColumns}
+          rows={demoRows}
+          totalRecords={1}
+          loading={false}
+        />
+      </div>
+    </div>
+  );
+}

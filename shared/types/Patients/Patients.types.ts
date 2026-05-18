@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 export const sortFields = ["name", "age", "createdAt"] as const;
 
 export interface PatientsQueryParamsType {
@@ -59,26 +57,3 @@ export type UpdatePatientRequestType = {
 export type DeletePatientRequestType = {
   id: number;
 };
-
-/**
- * Zod validation schemas for patient forms
- */
-export const createPatientFormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, "Name is required")
-    .min(2, "Name must be at least 2 characters"),
-  age: z.coerce
-    .number()
-    .int()
-    .min(1, "Age must be greater than 0")
-    .max(150, "Age must be less than 150"),
-  email: z.string().trim().email("Please enter a valid email"),
-  gender: z.enum(["MALE", "FEMALE"]),
-});
-
-export const updatePatientFormSchema = createPatientFormSchema;
-
-export type CreatePatientFormType = z.infer<typeof createPatientFormSchema>;
-export type UpdatePatientFormType = z.infer<typeof updatePatientFormSchema>;

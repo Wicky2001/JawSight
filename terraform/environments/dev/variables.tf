@@ -44,7 +44,7 @@ variable "lambda_memory" {
 variable "webhook_url" {
   description = "Webhook URL for SNS notifications"
   type        = string
-  default     = "https://reluctant-ferocity-monoxide.ngrok-free.dev/api/inference/sns-webhook" # Placeholder
+  default     = "https://reluctant-ferocity-monoxide.ngrok-free.dev/api/inference/sns-webhook" 
 }
 
 variable "image_uri" {

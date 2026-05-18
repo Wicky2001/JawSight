@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Info,
   CheckCircle,
@@ -10,15 +10,14 @@ import { dataURLtoFile } from "../../helpers/utils";
 import { InfoCallout } from "../../helpers/ui/InfoCallout";
 import LoadingSpinner from "../../helpers/ui/LoadingSpinner";
 import { toastHelper } from "../../helpers/toastHelper";
-import {
-  TablePageWrapper,
-  TableContentWrapper,
-} from "../../helpers/ui/PageWrapper";
-import { UploadZone } from "./UploadZone";
+import { InnerPageBody, InnerPageWrapper } from "../../helpers/ui/PageWrapper";
+import { UploadZone } from "./UploadZone.tsx";
 import { LandmarkModal } from "./LandmarkModal";
 import { useSocket } from "../../context/SocketContext";
 import PageHeader from "./InferencePageHeader";
 import { fetchPatientDropdown } from "./Inference.service";
+
+type InferencePhase = "idle" | "uploading" | "processing" | "completed";
 
 const Inference = () => {
   const [images, setImages] = useState<{
@@ -37,7 +36,10 @@ const Inference = () => {
 
   const [showLandmarkModal, setShowLandmarkModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isDropdownLoading, setIsDropdownLoading] = useState(false);
+  const [phase, setPhase] = useState<InferencePhase>("idle");
+  const processingTimeoutRef = useRef<number | null>(null);
 
   const { latestPrediction, clearPrediction } = useSocket();
 
@@ -50,7 +52,7 @@ const Inference = () => {
         setDropDownData(result.rows);
       } catch (error) {
         console.error("Failed to load patient dropdown data", error);
-        toastHelper.error("Failed to load patient list.");
+        toastHelper.error("Failed to load patient names.");
       } finally {
         setIsDropdownLoading(false);
       }
@@ -61,17 +63,59 @@ const Inference = () => {
 
   useEffect(() => {
     if (latestPrediction) {
-      setIsSubmitting(false);
+      if (processingTimeoutRef.current) {
+        window.clearTimeout(processingTimeoutRef.current);
+        processingTimeoutRef.current = null;
+      }
+
+      setIsProcessing(false);
 
       if (latestPrediction.status === "success") {
         const { data } = latestPrediction;
-        debugger;
+
         setImages({ left: data.left, right: data.right, front: data.front });
+        toastHelper.success("Inference completed successfully!");
+        setPhase("completed");
+      } else if (latestPrediction.status === "failed") {
+        toastHelper.error(
+          latestPrediction.message || "Inference failed. Please try again.",
+        );
+        setPhase("completed");
+      } else {
+        setPhase("idle");
       }
 
       clearPrediction();
     }
   }, [latestPrediction]);
+
+  useEffect(() => {
+    return () => {
+      if (processingTimeoutRef.current) {
+        window.clearTimeout(processingTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const clearProcessingTimeout = () => {
+    if (processingTimeoutRef.current) {
+      window.clearTimeout(processingTimeoutRef.current);
+      processingTimeoutRef.current = null;
+    }
+  };
+
+  const resetInference = () => {
+    clearProcessingTimeout();
+    setImages({ left: null, right: null, front: null });
+    setCsvData(null);
+    setSavedPointsArray(null);
+    setSelectedPatientId(null);
+    setShowLandmarkModal(false);
+    setIsSubmitting(false);
+    setIsProcessing(false);
+    setPhase("idle");
+    clearPrediction();
+  };
 
   const handleUpload = (id: "left" | "right" | "front", dataUrl: string) => {
     setImages((prev) => ({ ...prev, [id]: dataUrl }));
@@ -92,16 +136,21 @@ const Inference = () => {
     setCsvData(csvString);
     setSavedPointsArray(rawPoints);
     setShowLandmarkModal(false);
-    toastHelper.success("front.csv generated successfully!");
+    toastHelper.success("Front landmarks saved successfully!");
   };
 
   const isReadyToSubmit =
-    images.left && images.right && images.front && csvData;
+    images.left &&
+    images.right &&
+    images.front &&
+    csvData &&
+    selectedPatientId !== null;
 
   const handleSubmit = async () => {
     if (!isReadyToSubmit || selectedPatientId === null) return;
 
     setIsSubmitting(true);
+    setPhase("uploading");
     try {
       const formData = new FormData();
       formData.append("patientId", String(selectedPatientId));
@@ -121,17 +170,32 @@ const Inference = () => {
       const csvBlob = new Blob([csvData as string], { type: "text/csv" });
       formData.append("frontCsv", csvBlob, "front.csv");
 
-      const response = await api.post("/inference", formData);
+      await api.post("/inference", formData);
 
-      console.log("Server Response:", response.data);
-      toastHelper.success("Inference data successfully submitted!");
+      toastHelper.success("PreOp Images successfully submitted!");
+      setIsSubmitting(false);
+      setIsProcessing(true);
+      setPhase("processing");
+
+      clearProcessingTimeout();
+      processingTimeoutRef.current = window.setTimeout(() => {
+        setIsSubmitting(false);
+        setIsProcessing(false);
+        setPhase("idle");
+        toastHelper.error(
+          "Inference is taking too long. Please try submitting again.",
+        );
+      }, 15 * 60 * 1000);
     } catch (error: any) {
       console.error("Submission failed:", error);
+      clearProcessingTimeout();
       toastHelper.error(
         error.response?.data?.message ||
           "Failed to submit data. Please try again.",
       );
       setIsSubmitting(false);
+      setIsProcessing(false);
+      setPhase("idle");
     }
   };
 
@@ -146,7 +210,7 @@ const Inference = () => {
         />
       )}
 
-      <TablePageWrapper>
+      <InnerPageWrapper>
         <PageHeader
           selectedPatientId={selectedPatientId}
           setSelectedPatientId={setSelectedPatientId}
@@ -154,11 +218,11 @@ const Inference = () => {
           isLoading={isDropdownLoading}
         />
 
-        <TableContentWrapper>
-          <div className="max-w-7xl mx-auto w-full px-6 py-8">
+        <InnerPageBody>
+          <div className="w-full mx-auto px-6 py-8">
             {/* Removed flex-1 and min-h-0 so the grid expands naturally based on its content */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-              <div className="lg:col-span-7 flex flex-col">
+            <div className="flex md:flex-row gap-6 mb-6 w-full">
+              <div className="lg:col-span-6 flex flex-col">
                 {/* Removed overflow-y-auto to stop inner scrolling. Added h-full to match the right card's height */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full">
                   <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 shrink-0">
@@ -166,8 +230,8 @@ const Inference = () => {
                     1. Side Profiles
                   </h2>
 
-                  {/* Restored generous height (min-h-[320px]) since it can safely push the page down now */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 min-h-[320px]">
+                  {/* Responsive height: smaller on md screens, larger on lg+ */}
+                  <div className="grid grid-cols-1 gap-6 mb-6 min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
                     <UploadZone
                       id="left"
                       title="Left Profile"
@@ -176,7 +240,9 @@ const Inference = () => {
                       bgImage="/leftUploadPlaceHolder.png"
                       onUpload={handleUpload}
                       onRemove={handleRemove}
-                      onError={(message) => toastHelper.error(message)}
+                      onError={(message: string) => toastHelper.error(message)}
+                      showControls={phase !== "completed"}
+                      showStatus={phase !== "completed"}
                     />
                     <UploadZone
                       id="right"
@@ -186,7 +252,9 @@ const Inference = () => {
                       bgImage="/rightUploadPlaceHolder.png"
                       onUpload={handleUpload}
                       onRemove={handleRemove}
-                      onError={(message) => toastHelper.error(message)}
+                      onError={(message: string) => toastHelper.error(message)}
+                      showControls={phase !== "completed"}
+                      showStatus={phase !== "completed"}
                     />
                   </div>
 
@@ -214,7 +282,7 @@ const Inference = () => {
                 </div>
               </div>
 
-              <div className="lg:col-span-5 flex flex-col">
+              <div className="lg:col-span-6 flex flex-col">
                 {/* Removed overflow-y-auto. Added h-full */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full">
                   <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 shrink-0">
@@ -222,7 +290,7 @@ const Inference = () => {
                     2. Front Profile
                   </h2>
 
-                  <div className="flex-1 mb-6 min-h-[320px]">
+                  <div className="flex-1 mb-6 min-h-[240px] md:min-h-[280px] lg:min-h-[320px]">
                     <UploadZone
                       id="front"
                       title="Front Face"
@@ -232,8 +300,10 @@ const Inference = () => {
                       hasCsv={!!csvData}
                       onUpload={handleUpload}
                       onRemove={handleRemove}
-                      onError={(message) => toastHelper.error(message)}
+                      onError={(message: string) => toastHelper.error(message)}
                       onEditMarks={() => setShowLandmarkModal(true)}
+                      showControls={phase !== "completed"}
+                      showStatus={phase !== "completed"}
                     />
                   </div>
 
@@ -252,10 +322,26 @@ const Inference = () => {
               </div>
             </div>
 
-            {/* Action Footer */}
             <div className="shrink-0 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                {!isReadyToSubmit ? (
+                {phase === "completed" ? (
+                  <p className="text-emerald-600 font-medium text-sm flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Result images ready. Start a new inference when you are
+                    ready.
+                  </p>
+                ) : isProcessing ? (
+                  <p className="text-slate-500 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-500" />
+                    Processing completed on the backend. Waiting for result
+                    images.
+                  </p>
+                ) : isSubmitting ? (
+                  <p className="text-slate-500 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-500" />
+                    Uploading images and CSV to the server.
+                  </p>
+                ) : !isReadyToSubmit ? (
                   <p className="text-slate-500 text-sm flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-500" />
                     Please upload all three images and mark front landmarks to
@@ -270,18 +356,30 @@ const Inference = () => {
               </div>
 
               <button
-                disabled={!isReadyToSubmit || isSubmitting}
-                onClick={handleSubmit}
-                className={`px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-white transition-all duration-200 shadow-sm min-w-[220px]
-              ${
-                !isReadyToSubmit || isSubmitting
-                  ? "bg-slate-300 cursor-not-allowed opacity-70"
-                  : "bg-teal-600 hover:bg-teal-700 hover:shadow-md active:scale-95 cursor-pointer"
-              }`}
+                disabled={
+                  phase !== "completed" &&
+                  (!isReadyToSubmit || isSubmitting || isProcessing)
+                }
+                onClick={phase === "completed" ? resetInference : handleSubmit}
+                className={`px-8 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-white transition-all duration-200 shadow-sm min-w-[220px] ${
+                  phase === "completed"
+                    ? "bg-teal-600 hover:bg-teal-700 hover:shadow-md active:scale-95 cursor-pointer"
+                    : !isReadyToSubmit || isSubmitting || isProcessing
+                      ? "bg-slate-300 cursor-not-allowed opacity-70"
+                      : "bg-teal-600 hover:bg-teal-700 hover:shadow-md active:scale-95 cursor-pointer"
+                }`}
               >
-                {isSubmitting ? (
+                {phase === "completed" ? (
+                  "Submit another Inference"
+                ) : isSubmitting ? (
                   <LoadingSpinner
-                    label="Uploading Data..."
+                    label="Uploading..."
+                    spinnerClassName="w-5 h-5"
+                    labelClassName="text-white"
+                  />
+                ) : isProcessing ? (
+                  <LoadingSpinner
+                    label="Processing..."
                     spinnerClassName="w-5 h-5"
                     labelClassName="text-white"
                   />
@@ -291,8 +389,8 @@ const Inference = () => {
               </button>
             </div>
           </div>
-        </TableContentWrapper>
-      </TablePageWrapper>
+        </InnerPageBody>
+      </InnerPageWrapper>
     </>
   );
 };

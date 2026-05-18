@@ -14,8 +14,8 @@ export const getPatientListSchema = {
 export const createPatientSchema = {
   body: z.object({
     name: z.string().trim().min(1, "Name is required"),
-    age: z.number().int().min(0, "Age must be a positive number"),
-    email: z.string().email("Valid email is required"),
+    age: z.number().int().min(19, "Age must be greater than 18"),
+    email: z.email("Valid email is required"),
     gender: z.enum(["MALE", "FEMALE"]),
   }),
 };
@@ -24,8 +24,8 @@ export const updatePatientSchema = {
   body: z.object({
     id: z.coerce.number().int().positive("Patient ID is required"),
     name: z.string().trim().min(1, "Name is required"),
-    age: z.number().int().min(0, "Age must be a positive number"),
-    email: z.string().email("Valid email is required"),
+    age: z.number().int().min(19, "Age must be greater than 18"),
+    email: z.email("Valid email is required"),
     gender: z.enum(["MALE", "FEMALE"]),
   }),
 };

@@ -8,6 +8,7 @@ import type {
   InferenceDetailViewRequestType,
   InferenceDetailViewResponseType,
 } from "../../../../../shared/types/InferenceHistory/InferenceHistoryDetailView/InferenceDetalView.types.js";
+import { de, tr } from "zod/locales";
 
 const SIGNED_URL_EXPIRY_SECONDS = 30 * 60;
 
@@ -45,6 +46,7 @@ export const getInferenceDetailView = async (
       patient_id,
       iteration_code: inference_id,
     },
+    raw: true,
   });
 
   if (!inferenceHistory) {

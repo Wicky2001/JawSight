@@ -281,6 +281,45 @@
   background: var(--color-modal-bg) !important;
 }
 
+/* Landmark modal helpers */
+.landmark-modal-panel {
+  background: var(--color-surface-elevated) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-modal) !important;
+}
+.landmark-modal-header {
+  background: var(--color-bg-page) !important;
+  border-color: var(--border-primary) !important;
+}
+.landmark-modal-stage {
+  background: var(--color-bg-page) !important;
+}
+.landmark-modal-footer {
+  background: var(--color-surface-elevated) !important;
+  border-color: var(--border-primary) !important;
+}
+.landmark-modal-title {
+  color: var(--text-primary) !important;
+}
+.landmark-modal-subtitle {
+  color: var(--text-secondary) !important;
+}
+.landmark-modal-close {
+  color: var(--text-secondary) !important;
+}
+.landmark-modal-close:hover {
+  background: var(--color-hover-bg) !important;
+}
+.landmark-modal-marker {
+  border-color: var(--color-surface-card) !important;
+}
+.landmark-modal-marker-nose {
+  background: var(--info) !important;
+}
+.landmark-modal-marker-face {
+  background: var(--error) !important;
+}
+
 /* Branding helpers */
 .brand-text {
   color: var(--brand-primary) !important;
@@ -373,25 +412,33 @@ footer a:hover {
 }
 .Toastify__toast {
   background: var(--color-surface-card) !important;
+  background-image: none !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-primary) !important;
   box-shadow: var(--shadow-dropdown) !important;
 }
 .Toastify__toast--success {
-  background: linear-gradient(
-    90deg,
-    var(--brand-subtle-bg),
-    var(--color-surface-card)
-  ) !important;
+  background: var(--success) !important;
+  background-image: none !important;
+  color: var(--text-inverse) !important;
   border-left: 4px solid var(--success) !important;
 }
 .Toastify__toast--error {
+  background: var(--error) !important;
+  background-image: none !important;
+  color: var(--text-inverse) !important;
   border-left: 4px solid var(--error) !important;
 }
 .Toastify__toast--warning {
+  background: var(--warning) !important;
+  background-image: none !important;
+  color: var(--text-inverse) !important;
   border-left: 4px solid var(--warning) !important;
 }
 .Toastify__toast--info {
+  background: var(--info) !important;
+  background-image: none !important;
+  color: var(--text-inverse) !important;
   border-left: 4px solid var(--info) !important;
 }
 
